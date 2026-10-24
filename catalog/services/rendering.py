@@ -202,4 +202,7 @@ def render_markdown(text: str, branch, current_path: str) -> Rendered:
         url_schemes=NH3_URL_SCHEMES,
         link_rel=None,  # 外链图片存根需要自行管理 rel/target
     )
+    # reverse() 已对路径做一次百分号编码，ammonia 重写 URL 时会把 “%” 再编码
+    # 成 %25——统一还原为单次编码（含真实 % 的文件名经此变换仍正确）。
+    cleaned = re.sub(r"%25([0-9A-Fa-f]{2})", r"%\1", cleaned)
     return Rendered(html=cleaned)

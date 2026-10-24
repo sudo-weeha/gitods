@@ -10,7 +10,7 @@ from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 
-from catalog.models import Branch, Entry, Project
+from catalog.models import Branch, Entry, ImportDraft, Project
 from catalog.services.exceptions import (
     CapacityExceeded,
     NotFound,
@@ -114,5 +114,7 @@ def delete_branch(*, project_id, branch_id) -> None:
             raise ValidationError("最后一个分支不能删除")
         if project.default_branch_id == branch.pk:
             raise ValidationError("默认分支不能删除；请先设置其他默认分支")
+        # 已完结草稿仅是记录（临时清单已清理），随分支删除；避免 PROTECT 阻塞
+        ImportDraft.objects.filter(branch=branch).delete()
         branch.delete()
         Project.objects.filter(pk=project.pk).update(updated_at=timezone.now())

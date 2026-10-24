@@ -7,7 +7,7 @@ import re
 
 from django.db import transaction
 
-from catalog.models import Branch, Group, Project
+from catalog.models import Branch, Group, ImportDraft, Project
 from catalog.services.exceptions import NotFound, ValidationError
 
 RESERVED_SLUGS = {"admin", "api", "explore", "static", "healthz"}
@@ -124,8 +124,10 @@ def delete_project(*, project_id) -> None:
     """
     with transaction.atomic():
         project = _lock(Project, project_id)
-        # 先清空默认分支关联，解除 Project↔Branch 的循环 PROTECT
+        # 先清空默认分支关联，解除 Project↔Branch 的循环 PROTECT；
+        # 草稿对项目 PROTECT，已完结记录随项目删除
         Project.objects.filter(pk=project.pk, default_branch__isnull=False).update(default_branch=None)
         project.refresh_from_db()
+        ImportDraft.objects.filter(project=project).delete()
         # Branch.project CASCADE → Entry.branch CASCADE，一并删除
         project.delete()

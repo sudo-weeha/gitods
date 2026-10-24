@@ -106,6 +106,24 @@ class TestDeleteBranch:
         project.refresh_from_db()
         assert project.default_branch_id == new_default.id
 
+    def test_delete_with_finished_import_draft(self, project, branch, django_user_model):
+        # 已完结（published）草稿的 PROTECT 不应阻塞分支删除
+        from datetime import timedelta
+
+        from catalog.models import ImportDraft
+        from django.utils import timezone
+
+        owner = django_user_model.objects.create_superuser("draft-owner", password="Draft-Owner-42")
+        ImportDraft.objects.create(
+            project=project, branch=branch, owner=owner, expected_revision=branch.revision,
+            status=ImportDraft.STATUS_PUBLISHED,
+            expires_at=timezone.now() + timedelta(minutes=30),
+        )
+        other = create_branch(project_id=project.id, name="dev")
+        set_default_branch(project_id=project.id, branch_id=other.id)
+        delete_branch(project_id=project.id, branch_id=branch.id)  # 不抛 ProtectedError
+        assert not Branch.objects.filter(pk=branch.id).exists()
+
     def test_delete_cascades_entries_keeps_blob(self, project, branch):
         entry = add_file(branch, "README.md", b"content")
         blob_pk = entry.blob.pk

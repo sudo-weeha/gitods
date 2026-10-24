@@ -74,9 +74,7 @@
             <form method="post" action="{% url 'admin:catalog-project-branch-set-default' project.pk b.pk %}" style="display:inline;">{% csrf_token %}
               <input type="submit" value="设为默认">
             </form>
-            <form method="post" action="{% url 'admin:catalog-project-branch-delete' project.pk b.pk %}?next=/{{ project.group.slug }}/{{ project.slug }}/" style="display:inline;">{% csrf_token %}
-              <input type="submit" value="删除…">
-            </form>
+            <a class="button" href="{% url 'admin:catalog-project-branch-delete' project.pk b.pk %}?next=/{{ project.group.slug }}/{{ project.slug }}/">删除…</a>
             {% else %}
             <span class="help">默认分支</span>
             {% endif %}

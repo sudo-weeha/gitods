@@ -19,7 +19,7 @@
     var data = new FormData(form);
     var xhr = new XMLHttpRequest();
     xhr.open(form.method, form.getAttribute("action"));
-    xhr.responseType = "document";
+    // 保持默认 responseType（text）：document 模式下无法读 responseText
 
     if (bar) {
       bar.style.display = "block";
