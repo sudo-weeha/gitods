@@ -5,6 +5,20 @@
   </div>
   {% if listing %}
   <ul class="file-table">
+    {% if rel_path %}
+    <li class="file-row is-dir is-parent">
+      <span class="col-name">
+        {% icon 'folder' 'file-icon icon-dir' %}
+        {% if rel_path|dirname %}
+        <a href="{% url 'project-tree' group.slug project.slug rel_path|dirname %}?branch={{ branch.pk }}">..</a>
+        {% else %}
+        <a href="{% url 'project-home' group.slug project.slug %}?branch={{ branch.pk }}">..</a>
+        {% endif %}
+      </span>
+      <span class="col-size">—</span>
+      <span class="col-time"></span>
+    </li>
+    {% endif %}
     {% for e in listing %}
     <li class="file-row{% if e.kind == 'dir' %} is-dir{% endif %}">
       <span class="col-name">

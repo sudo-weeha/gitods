@@ -1,8 +1,11 @@
-"""公开页面读取查询：分组导航、项目列表、项目上下文。
+"""公开页面读取查询：分组导航、项目列表、项目上下文与短只读快照。
 
-任务 5 会为项目页引入短只读快照事务；本模块保持纯查询，便于复用。
+项目页同一响应的多个查询使用 PostgreSQL REPEATABLE READ READ ONLY
+短事务取得一致快照；普通 atomic() 的 READ COMMITTED 不足以保证
+跨查询一致。事务结束后才读取不可变对象内容，不在输出期间持有事务。
 """
 import re
+from contextlib import contextmanager
 
 from django.core.paginator import EmptyPage, Paginator
 from django.db.models import Count, Q
@@ -87,3 +90,25 @@ def get_entry(branch, path) -> Entry | None:
 
 def count_entries(branch) -> int:
     return Entry.objects.filter(branch=branch).count()
+
+
+@contextmanager
+def readonly_snapshot():
+    """短 PostgreSQL REPEATABLE READ READ ONLY 事务，跨查询一致快照。
+
+    生产请求不启用 ATOMIC_REQUESTS，atomic() 发出真正的 BEGIN，
+    SET TRANSACTION 作为首条语句合法。若已处于外层事务（测试的
+    事务包装或嵌套调用），SAVEPOINT 上无法切换隔离级别，退化为
+    普通原子块——外层事务本身提供同等或更强的隔离。
+    """
+    from django.db import connection, transaction
+
+    if connection.in_atomic_block:
+        with transaction.atomic():
+            yield
+        return
+
+    with transaction.atomic():
+        with connection.cursor() as cursor:
+            cursor.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
+        yield

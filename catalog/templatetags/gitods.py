@@ -114,3 +114,9 @@ LANG_COLORS = {
 @register.filter
 def lang_color(language):
     return LANG_COLORS.get((language or "").strip().lower(), "#687386")
+
+
+@register.filter
+def dirname(path):
+    """父目录路径；根下一级返回空字符串。"""
+    return path.rsplit("/", 1)[0] if "/" in path else ""

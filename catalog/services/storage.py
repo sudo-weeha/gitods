@@ -67,3 +67,9 @@ def store_bytes(data: bytes) -> Blob:
 
 def open_blob(blob: Blob):
     return open(object_path(blob.sha256), "rb")
+
+
+def read_object_bytes(sha256: str) -> bytes:
+    """整读对象内容（预览用）；下载走 FileResponse 流式读取。"""
+    with open(object_path(sha256), "rb") as stream:
+        return stream.read()
