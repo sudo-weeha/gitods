@@ -1,0 +1,32 @@
+{% load gitods gitods_icons %}
+<div class="file-panel panel">
+  <div class="file-table-head" aria-hidden="true">
+    <span class="col-name">名称</span><span class="col-size">大小</span><span class="col-time">更新时间</span>
+  </div>
+  {% if listing %}
+  <ul class="file-table">
+    {% for e in listing %}
+    <li class="file-row{% if e.kind == 'dir' %} is-dir{% endif %}">
+      <span class="col-name">
+        {% if e.kind == 'dir' %}{% icon 'folder' 'file-icon icon-dir' %}{% else %}{% icon e.name|file_icon 'file-icon icon-file' %}{% endif %}
+        {% if e.kind == 'dir' %}
+        <a href="{% url 'project-tree' group.slug project.slug e.path %}?branch={{ branch.pk }}">{{ e.name }}</a>
+        {% else %}
+        <a href="{% url 'project-blob' group.slug project.slug e.path %}?branch={{ branch.pk }}">{{ e.name }}</a>
+        {% endif %}
+      </span>
+      <span class="col-size">{% if e.kind == 'dir' %}—{% else %}{{ e.size|filesize }}{% endif %}</span>
+      <span class="col-time"><time title="{{ e.updated_at|fulltime }}">{{ e.updated_at|reltime }}</time></span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <div class="empty-state">
+    {% icon 'folder' 'empty-icon' %}
+    <p>{% if rel_path %}此目录为空{% else %}该分支还没有任何文件{% endif %}</p>
+    {% if is_staff %}
+    <a class="btn btn-primary" href="/admin/catalog/project/{{ project.pk }}/files/?branch={{ branch.pk }}">{% icon 'upload' %}上传文件</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>

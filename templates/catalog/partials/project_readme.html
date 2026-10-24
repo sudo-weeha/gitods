@@ -1,0 +1,23 @@
+{% load gitods_icons %}
+{% if readme %}
+<section class="readme-panel panel">
+  <div class="readme-head">
+    <span class="readme-head-name">{% icon 'file-text' %}{{ readme.name }}</span>
+    <a class="readme-source-link" href="{% url 'project-blob' group.slug project.slug readme.path %}?branch={{ branch.pk }}">查看源码</a>
+  </div>
+  <div class="readme-body markdown-body">
+    {% if readme_html %}
+    {{ readme_html|safe }}
+    {% elif readme_error %}
+    <p class="readme-error">README 不是 UTF-8 文本，暂时无法渲染，请下载查看。</p>
+    {% endif %}
+  </div>
+</section>
+{% elif is_staff %}
+<section class="readme-panel panel">
+  <div class="readme-head"><span class="readme-head-name">{% icon 'file-text' %}README.md</span></div>
+  <div class="empty-state slim">
+    <p>还没有 README.md，上传一个让访客更快了解项目。</p>
+  </div>
+</section>
+{% endif %}

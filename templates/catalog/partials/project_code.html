@@ -1,0 +1,43 @@
+{% load gitods gitods_icons %}
+<div class="code-panel panel">
+  <div class="code-head">
+    <span class="code-head-name">{% icon entry.name|file_icon 'file-icon' %}{{ entry.name }}</span>
+    <span class="code-head-meta">{{ entry.size|filesize }}{% if rendered.line_count %} · {{ rendered.line_count }} 行{% endif %}</span>
+    <div class="code-head-actions">
+      {% if not rendered.too_large and not rendered.binary %}
+      <button class="btn btn-ghost" type="button" data-copy-url="{{ raw_url }}">{% icon 'copy' %}复制全文</button>
+      <button class="btn btn-ghost" type="button" data-copy-text="{{ entry.path }}">{% icon 'copy' %}复制路径</button>
+      {% endif %}
+      <a class="btn btn-ghost" href="{{ raw_download_url }}">{% icon 'download' %}下载</a>
+      {% if is_markdown and markdown_html %}
+      <a class="btn btn-ghost" href="?branch={{ branch.pk }}{% if not show_source %}&amp;view=source{% endif %}">{% if show_source %}查看渲染{% else %}查看源码{% endif %}</a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="code-scroll">
+    {% if rendered.too_large %}
+    <div class="empty-state">
+      {% icon 'file-archive' 'empty-icon' %}
+      <p>文件超过文本预览上限，暂不支持在线预览</p>
+      <p class="empty-hint">大小 {{ entry.size|filesize }}，请下载后查看</p>
+      <a class="btn btn-primary" href="{{ raw_download_url }}">{% icon 'download' %}下载文件</a>
+    </div>
+    {% elif rendered.binary %}
+    <div class="empty-state">
+      {% icon 'image' 'empty-icon' %}
+      <p>此文件暂不支持文本预览，请下载查看</p>
+      <p class="empty-hint">大小 {{ entry.size|filesize }}</p>
+      <a class="btn btn-primary" href="{{ raw_download_url }}">{% icon 'download' %}下载文件</a>
+    </div>
+    {% elif is_markdown and markdown_html and not show_source %}
+    <div class="markdown-body md-preview">{{ markdown_html|safe }}</div>
+    {% elif rendered.line_count == 0 %}
+    <div class="empty-state slim"><p>空文件</p></div>
+    {% else %}
+    <div class="code-content">{{ rendered.html|safe }}</div>
+    {% if rendered.truncated %}
+    <div class="code-truncated">已显示前 {{ rendered.line_count }} 行，完整内容请下载查看。</div>
+    {% endif %}
+    {% endif %}
+  </div>
+</div>

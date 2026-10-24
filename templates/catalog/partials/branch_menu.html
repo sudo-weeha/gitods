@@ -1,0 +1,29 @@
+{% load gitods_icons %}
+<details class="branch-menu menu">
+  <summary class="btn btn-default branch-summary">
+    {% icon 'git-branch' %}
+    <span class="branch-name">{{ branch.name }}</span>
+    {% if is_default_branch %}<span class="branch-default-badge">默认</span>{% endif %}
+    {% icon 'chevron-down' 'chev' %}
+  </summary>
+  <div class="menu-panel">
+    <div class="menu-title">切换分支</div>
+    {% if branches|length > 6 %}
+    <input class="branch-filter" type="search" placeholder="过滤分支…" data-filter-list aria-label="过滤分支">
+    {% endif %}
+    <ul class="menu-list">
+      {% for b in branches %}
+      <li>
+        <a class="branch-option{% if b.pk == branch.pk %} is-active{% endif %}" href="{{ branch_switch_base }}?branch={{ b.pk }}">
+          {% icon 'git-branch' 'branch-option-icon' %}
+          <span>{{ b.name }}</span>
+          {% if b.pk == project.default_branch_id %}<span class="branch-default-badge">默认</span>{% endif %}
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+    {% if is_staff %}
+    <a class="menu-footer" href="/admin/catalog/project/{{ project.pk }}/branches/">{% icon 'plus' %}创建分支 / 管理分支</a>
+    {% endif %}
+  </div>
+</details>

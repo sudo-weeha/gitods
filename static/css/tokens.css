@@ -1,0 +1,32 @@
+/* GitODS 设计令牌（设计文档 4.1）；Gitee 式工程内容站：
+   白底、细边框、高密度、蓝绿链接、橙色强调。 */
+:root {
+  --bg: #ffffff;
+  --bg-secondary: #f7f8fa;
+  --text: #40485b;
+  --text-title: #24292f;
+  --text-muted: #687386;
+  --link: #08779b;
+  --link-hover: #055e80;
+  --accent: #ff6b00;
+  --accent-deep: #b84900;
+  --accent-bg: #fff6ee;
+  --border: #e3e6eb;
+  --border-strong: #cbd2dc;
+  --selected: #e8f1fc;
+  --selected-text: #15507e;
+  --topbar-bg: #24292f;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Microsoft YaHei", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+
+  --radius: 4px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --container: 1440px;
+}

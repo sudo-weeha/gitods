@@ -1,0 +1,62 @@
+{% load gitods gitods_icons %}
+<div id="results-column" class="results-column">
+  <div class="results-head">
+    <div class="results-count">{{ current_group.name|default:"全部项目" }} · {{ page.paginator.count }}</div>
+    <nav class="results-sort" aria-label="排序方式">
+      {% for s in sort_links %}
+      <a class="sort-item{% if s.key == sort %} is-active{% endif %}" href="{{ s.href }}"
+         hx-get="{{ s.href }}" hx-target="#results-column" hx-swap="outerHTML" hx-push-url="true"
+         {% if s.key == sort %}aria-current="true"{% endif %}>{{ s.label }}</a>
+      {% endfor %}
+    </nav>
+  </div>
+  {% if projects %}
+  <div class="project-list">
+    {% for p in projects %}
+    <article class="project-item">
+      <span class="avatar avatar-32" style="background: {{ p.name|avatar_color }}" aria-hidden="true">{{ p.name|avatar_initials }}</span>
+      <div class="project-item-body">
+        <h3 class="project-item-title">
+          <span class="project-item-group">{{ p.group.name }} /</span>
+          <a class="project-item-link" href="{% url 'project-home' p.group.slug p.slug %}">{{ p.name }}</a>
+        </h3>
+        {% if p.description %}
+        <p class="project-item-desc">{{ p.description }}</p>
+        {% endif %}
+        <div class="project-item-meta">
+          {% if p.language %}<span class="meta-lang"><span class="lang-dot" style="background: {{ p.language|lang_color }}"></span>{{ p.language }}</span>{% endif %}
+          <span class="meta-group">{{ p.group.name }}</span>
+          <span class="meta-time"><time title="{{ p.updated_at|fulltime }}">{{ p.updated_at|reltime }}</time></span>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% if page.paginator.num_pages > 1 %}
+  <nav class="pagination" aria-label="分页">
+    {% for link in page_links %}
+      {% if link.kind == 'current' %}
+        <span class="page-current" aria-current="page">{{ link.label }}</span>
+      {% elif link.kind == 'ellipsis' %}
+        <span class="page-ellipsis">…</span>
+      {% else %}
+        <a class="page-link page-{{ link.kind }}" href="{{ link.href }}"
+           hx-get="{{ link.href }}" hx-target="#results-column" hx-swap="outerHTML" hx-push-url="true">{{ link.label }}</a>
+      {% endif %}
+    {% endfor %}
+  </nav>
+  {% endif %}
+  {% else %}
+  <div class="empty-state panel">
+    {% icon 'search' 'empty-icon' %}
+    {% if q %}
+    <p>没有找到与 “{{ q }}” 匹配的项目</p>
+    <p class="empty-hint">换个关键词，或清除筛选后重试</p>
+    {% elif current_group %}
+    <p>该分组暂无项目</p>
+    {% else %}
+    <p>还没有公开项目</p>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>

@@ -160,12 +160,14 @@ class Entry(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=["branch", "path"], name="uniq_entry_branch_path"),
+            # 约束须对所有行成立：目录行必须无 blob 且 size=0；文件行必须有 blob
             models.CheckConstraint(
-                condition=models.Q(kind="dir", blob__isnull=True, size=0),
+                condition=models.Q(kind="dir", blob__isnull=True, size=0)
+                | ~models.Q(kind="dir"),
                 name="entry_dir_no_blob",
             ),
             models.CheckConstraint(
-                condition=models.Q(kind="file", blob__isnull=False),
+                condition=models.Q(kind="file", blob__isnull=False) | ~models.Q(kind="file"),
                 name="entry_file_has_blob",
             ),
         ]

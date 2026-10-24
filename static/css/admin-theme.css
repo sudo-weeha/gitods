@@ -1,0 +1,62 @@
+/* Django Admin 轻量品牌化：深灰顶栏 + 橙色点缀；不另做第二套管理界面。 */
+#header {
+  background: #24292f;
+  border-bottom: 2px solid #ff6b00;
+}
+
+#header a:link,
+#header a:visited,
+#header a:hover {
+  color: #e8eaef;
+}
+
+#branding h1 a {
+  color: #ffffff;
+}
+
+#branding h1 a::after {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-left: 6px;
+  border-radius: 2px;
+  background: #ff6b00;
+}
+
+#user-tools a {
+  color: #c9d1d9;
+}
+
+/* 选中行与当前模型：淡蓝底 + 橙色边缘标记 */
+#changelist table tbody tr.selected {
+  background: #e8f1fc;
+}
+
+#nav-sidebar .current-app .current-model {
+  background: #e8f1fc;
+  border-left: 4px solid #ff6b00;
+}
+
+/* 主按钮与链接微调为站内色系 */
+.submit-row input[type="submit"],
+.submit-row input[type="submit"].default,
+button.default {
+  background: #b84900;
+}
+
+.submit-row input[type="submit"]:hover,
+.submit-row input[type="submit"].default:hover,
+button.default:hover {
+  background: #ff6b00;
+  color: #ffffff;
+}
+
+#changelist a:link,
+#changelist a:visited,
+.module a:link,
+.module a:visited,
+a:link,
+a:visited {
+  color: #08779b;
+}

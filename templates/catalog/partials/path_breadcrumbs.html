@@ -1,0 +1,6 @@
+<div class="path-crumbs" aria-label="当前路径">
+  {% for c in breadcrumbs %}
+  {% if not forloop.first %}<span class="crumb-sep" aria-hidden="true">/</span>{% endif %}
+  {% if c.href %}<a href="{{ c.href }}">{{ c.name }}</a>{% else %}<span class="crumb-current">{{ c.name }}</span>{% endif %}
+  {% endfor %}
+</div>

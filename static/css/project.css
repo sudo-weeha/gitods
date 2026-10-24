@@ -1,0 +1,571 @@
+/* 项目页：页头、Tab、分支工具栏、文件表格、README、简介栏。 */
+.project-page {
+  padding-bottom: 32px;
+}
+
+.crumbs {
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 8px 0;
+}
+
+.crumbs a {
+  color: var(--link);
+}
+
+/* ---------- 页头 ---------- */
+.project-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0 16px;
+  flex-wrap: wrap;
+}
+
+.project-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-title);
+  line-height: 1.3;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.project-title-group {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-right: 2px;
+}
+
+.project-header-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
+/* ---------- Tab（仅保留文件入口，橙色下划线） ---------- */
+.project-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.project-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 4px;
+  margin-right: 20px;
+  margin-bottom: -1px;
+  font-size: 15px;
+  color: var(--text);
+  border-bottom: 2px solid transparent;
+}
+
+.project-tab .icon {
+  width: 15px;
+  height: 15px;
+  color: var(--text-muted);
+}
+
+.project-tab.is-active {
+  color: var(--text-title);
+  font-weight: 600;
+  border-bottom-color: var(--accent);
+}
+
+.project-tab.is-active .icon {
+  color: var(--accent);
+}
+
+/* ---------- 工具栏 ---------- */
+.project-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  flex-wrap: wrap;
+}
+
+.branch-count {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.toolbar-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.branch-summary {
+  gap: 6px;
+}
+
+.branch-summary .chev {
+  width: 14px;
+  height: 14px;
+  color: var(--text-muted);
+}
+
+.branch-name {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.branch-default-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 6px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--bg-secondary);
+  flex: none;
+}
+
+.branch-option .branch-default-badge {
+  margin-left: auto;
+}
+
+.branch-option-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--text-muted);
+}
+
+.branch-filter {
+  width: calc(100% - 24px);
+  margin: 8px 12px 4px;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-family: inherit;
+}
+
+/* ---------- 主区 + 简介栏 ---------- */
+.project-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 28px;
+  align-items: start;
+}
+
+.path-crumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 0 0 10px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.path-crumbs a {
+  color: var(--link);
+}
+
+.path-crumbs a:hover {
+  text-decoration: underline;
+}
+
+.path-crumbs .crumb-sep {
+  color: #b8c0cc;
+  margin: 0 6px;
+}
+
+/* ---------- 文件表格 ---------- */
+.file-panel {
+  overflow: hidden;
+}
+
+.file-table-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 100px 150px;
+  gap: 8px;
+  padding: 9px 16px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.file-table {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.file-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 100px 150px;
+  gap: 8px;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.file-row:last-child {
+  border-bottom: none;
+}
+
+.file-row:hover {
+  background: #fafbfc;
+}
+
+.col-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 14px;
+}
+
+.col-name a {
+  color: var(--link);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.is-dir .col-name a {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.file-icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.icon-dir {
+  color: #4e7cbf;
+}
+
+.icon-file {
+  color: #8a94a6;
+}
+
+.col-size,
+.col-time {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+/* ---------- README ---------- */
+.readme-panel {
+  margin-top: 16px;
+}
+
+.readme-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.readme-head-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-title);
+}
+
+.readme-head-name .icon {
+  width: 15px;
+  height: 15px;
+  color: var(--text-muted);
+}
+
+.readme-source-link {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.readme-source-link:hover {
+  color: var(--link);
+}
+
+.readme-body {
+  padding: 24px;
+}
+
+.readme-error {
+  color: var(--text-muted);
+}
+
+/* ---------- Markdown 正文 ---------- */
+.markdown-body {
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--text-title);
+}
+
+.markdown-body > :first-child {
+  margin-top: 0;
+}
+
+.markdown-body h1 {
+  font-size: 26px;
+  margin: 24px 0 16px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+
+.markdown-body h2 {
+  font-size: 20px;
+  margin: 24px 0 12px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px;
+}
+
+.markdown-body h3,
+.markdown-body h4 {
+  font-size: 17px;
+  margin: 20px 0 10px;
+}
+
+.markdown-body p {
+  margin: 0 0 14px;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  margin: 0 0 14px;
+  padding-left: 24px;
+}
+
+.markdown-body li {
+  margin: 4px 0;
+}
+
+.markdown-body code {
+  font-size: 13.6px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+
+.markdown-body pre {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  overflow-x: auto;
+}
+
+.markdown-body pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 13.5px;
+  line-height: 1.65;
+}
+
+.markdown-body blockquote {
+  margin: 0 0 14px;
+  padding: 8px 16px;
+  border-left: 4px solid #dfe3e9;
+  background: var(--bg-secondary);
+  color: var(--text);
+}
+
+.markdown-body table {
+  border-collapse: collapse;
+  margin: 0 0 14px;
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.markdown-body th,
+.markdown-body td {
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.markdown-body th {
+  background: var(--bg-secondary);
+}
+
+.markdown-body img {
+  max-width: 100%;
+}
+
+.markdown-body hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 20px 0;
+}
+
+/* ---------- 简介栏 ---------- */
+.side-summary {
+  display: none;
+}
+
+.side-panel {
+  padding-bottom: 8px;
+}
+
+.side-desc {
+  padding: 12px 16px 4px;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.7;
+  margin: 0;
+  word-break: break-word;
+}
+
+.side-list {
+  margin: 8px 0;
+}
+
+.side-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 16px;
+  font-size: 13px;
+}
+
+.side-row dt {
+  color: var(--text-muted);
+  flex: none;
+}
+
+.side-row dd {
+  margin: 0;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 1279px) {
+  .project-layout {
+    grid-template-columns: minmax(0, 1fr) 240px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .project-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* 简介移到内容上方并可折叠 */
+  .project-side {
+    order: -1;
+  }
+
+  .side-summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-title);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .side-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .side-summary::after {
+    content: "";
+    margin-left: auto;
+    width: 8px;
+    height: 8px;
+    border-right: 1.5px solid var(--text-muted);
+    border-bottom: 1.5px solid var(--text-muted);
+    transform: rotate(45deg);
+    transition: transform 0.15s;
+  }
+
+  details[open] > .side-summary::after {
+    transform: rotate(225deg);
+  }
+
+  .side-summary + .side-panel {
+    margin-top: 8px;
+  }
+}
+
+@media (max-width: 767px) {
+  .project-header-actions {
+    margin-left: 0;
+  }
+
+  .toolbar-actions {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .file-table-head {
+    display: none;
+  }
+
+  /* 大小与更新时间并入名称第二行 */
+  .file-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 0;
+    padding: 8px 12px;
+    min-height: 48px;
+  }
+
+  .col-name {
+    flex: 1 1 100%;
+  }
+
+  .col-size {
+    flex: none;
+    text-align: left;
+    font-size: 11px;
+  }
+
+  /* 目录没有大小，第二行只显示时间 */
+  .file-row.is-dir .col-size {
+    display: none;
+  }
+
+  .col-size::after {
+    content: "·";
+    margin: 0 6px;
+    color: #b8c0cc;
+  }
+
+  .col-time {
+    flex: none;
+    text-align: left;
+    font-size: 11px;
+  }
+
+  .readme-body {
+    padding: 16px 12px;
+  }
+}

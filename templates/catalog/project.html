@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load static gitods gitods_icons %}
+{% block title %}{{ group.name }} / {{ project.name }} · GitODS{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'css/project.css' %}">
+<link rel="stylesheet" href="{% static 'css/code.css' %}">
+{% endblock %}
+{% block content %}
+<div class="project-page">
+  <nav class="crumbs" aria-label="路径">
+    <a href="{% url 'explore' %}">项目</a>
+    <span class="crumb-sep">/</span>
+    <a href="/explore/?group={{ group.slug }}">{{ group.name }}</a>
+    <span class="crumb-sep">/</span>
+    <span class="crumb-current">{{ project.slug }}</span>
+  </nav>
+  <header class="project-header">
+    <span class="avatar avatar-40" style="background: {{ project.name|avatar_color }}" aria-hidden="true">{{ project.name|avatar_initials }}</span>
+    <h1 class="project-title"><span class="project-title-group">{{ group.name }} /</span> {{ project.name }}</h1>
+    {% if is_staff %}
+    <div class="project-header-actions">
+      <a class="btn btn-default" href="/admin/catalog/project/{{ project.pk }}/change/">{% icon 'settings' %}项目设置</a>
+    </div>
+    {% endif %}
+  </header>
+  <nav class="project-tabs" aria-label="项目导航">
+    <span class="project-tab is-active">{% icon 'folder' 'tab-icon' %}文件</span>
+  </nav>
+  <div class="project-toolbar">
+    {% include "catalog/partials/branch_menu.html" %}
+    <span class="branch-count">分支 {{ branch_count }}</span>
+    <div class="toolbar-actions">
+      <a class="btn btn-default" href="/{{ group.slug }}/{{ project.slug }}/download/?branch={{ branch.pk }}">{% icon 'download' %}下载当前分支</a>
+      {% if is_staff %}
+      <a class="btn btn-default" href="/admin/catalog/project/{{ project.pk }}/branches/">{% icon 'git-branch' %}管理分支</a>
+      <a class="btn btn-default" href="/admin/catalog/project/{{ project.pk }}/files/?branch={{ branch.pk }}&path={{ rel_path }}">{% icon 'upload' %}上传文件</a>
+      <a class="btn btn-default" href="/admin/catalog/project/{{ project.pk }}/imports/?branch={{ branch.pk }}">{% icon 'package' %}导入 ZIP</a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="project-layout">
+    <section class="project-main">
+      {% if mode == 'missing' %}
+      <div class="state-panel panel">
+        {% icon 'x' 'state-icon' %}
+        <h2 class="state-title">此路径在该分支中不存在</h2>
+        <p class="state-text">分支 <strong>{{ branch.name }}</strong> 中没有 <code>{{ rel_path }}</code>，可能已被删除或移动。</p>
+        <a class="btn btn-primary" href="{% url 'project-home' group.slug project.slug %}?branch={{ branch.pk }}">返回该分支根目录</a>
+      </div>
+      {% elif mode == 'tree' %}
+      {% include "catalog/partials/path_breadcrumbs.html" %}
+      {% include "catalog/partials/project_file_table.html" %}
+      {% if not rel_path %}{% include "catalog/partials/project_readme.html" %}{% endif %}
+      {% else %}
+      {% include "catalog/partials/project_code.html" %}
+      {% endif %}
+    </section>
+    {% include "catalog/partials/project_sidebar.html" %}
+  </div>
+</div>
+{% endblock %}

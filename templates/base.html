@@ -1,0 +1,42 @@
+{% load static gitods_icons %}<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}GitODS — 项目与源码展示{% endblock %}</title>
+<link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
+<link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+{% block page_css %}{% endblock %}
+<script defer src="{% static 'vendor/htmx.min.js' %}"></script>
+<script defer src="{% static 'js/site.js' %}"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">跳到主要内容</a>
+<header class="topbar">
+  <div class="container topbar-inner">
+    <div class="topbar-left">
+      <a class="brand" href="{% url 'explore' %}">Git<span class="brand-ods">ODS</span></a>
+      <nav class="topnav" aria-label="主导航">
+        <a href="{% url 'explore' %}" {% if nav == 'explore' %}aria-current="page"{% endif %}>项目</a>
+      </nav>
+    </div>
+    <div class="topbar-right">
+      {% if request.user.is_staff %}
+        <a class="topbar-link" href="/admin/catalog/group/">管理分组</a>
+        <a class="topbar-link" href="/admin/catalog/project/add/">新建项目</a>
+        <form class="topbar-form" method="post" action="/admin/logout/">{% csrf_token %}<button type="submit" class="topbar-link">退出</button></form>
+      {% else %}
+        <a class="topbar-link topbar-login" href="/admin/login/?next={{ request.path|urlencode }}">管理员登录</a>
+      {% endif %}
+    </div>
+  </div>
+</header>
+<main id="main" class="container main-content">
+{% block content %}{% endblock %}
+</main>
+<footer class="footer">
+  <div class="container">GitODS · 项目与源码展示 · 内容以各项目声明的许可证为准</div>
+</footer>
+</body>
+</html>

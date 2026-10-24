@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load static gitods gitods_icons %}
+{% block title %}{{ page_title }} · GitODS{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{% static 'css/explore.css' %}">{% endblock %}
+{% block content %}
+<div class="explore-head">
+  <h1 class="page-title">{{ page_title }}</h1>
+  <form class="explore-search" method="get" action="{% url 'explore' %}"
+        hx-get="{% url 'explore' %}" hx-target="#results-column" hx-swap="outerHTML" hx-push-url="true">
+    {% if current_group %}<input type="hidden" name="group" value="{{ current_group.slug }}">{% endif %}
+    {% if sort != 'updated' %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
+    <input class="explore-search-input" type="search" name="q" value="{{ q }}" placeholder="搜索项目…" maxlength="100" aria-label="搜索项目">
+    <button class="explore-search-btn" type="submit" aria-label="搜索">{% icon 'search' %}</button>
+  </form>
+</div>
+<div class="explore-layout">
+  <aside class="group-nav" aria-label="分组导航">
+    <div class="group-nav-title">分组</div>
+    <div class="group-nav-list">
+      <a class="group-item{% if not current_group %} is-active{% endif %}" href="{{ all_groups_href }}"
+         hx-get="{{ all_groups_href }}" hx-target="#results-column" hx-swap="outerHTML" hx-push-url="true">
+        <span class="group-item-name">全部分组</span>
+        <span class="group-item-count">{{ total_projects }}</span>
+      </a>
+      {% for link in group_links %}
+      <a class="group-item{% if link.is_active %} is-active{% endif %}" href="{{ link.href }}"
+         hx-get="{{ link.href }}" hx-target="#results-column" hx-swap="outerHTML" hx-push-url="true">
+        {% icon link.group.icon 'group-item-icon' %}
+        <span class="group-item-name">{{ link.group.name }}</span>
+        <span class="group-item-count">{{ link.group.project_count }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </aside>
+  {% include "catalog/partials/explore_results.html" %}
+  <aside class="recent-projects" aria-label="最近更新">
+    <div class="panel">
+      <div class="panel-title">最近更新</div>
+      {% for p in recent %}
+      <div class="recent-item">
+        <a class="recent-name" href="{% url 'project-home' p.group.slug p.slug %}">{{ p.name }}</a>
+        <div class="recent-desc">{{ p.description|truncatechars:40 }}</div>
+        <div class="recent-meta">{{ p.group.name }} · {{ p.updated_at|reltime }}</div>
+      </div>
+      {% empty %}
+      <div class="recent-item recent-empty">暂无项目</div>
+      {% endfor %}
+    </div>
+  </aside>
+</div>
+{% endblock %}

@@ -1,0 +1,249 @@
+/* 源码面板：行号、Pygments 高亮、纯文本降级与 Markdown 预览。 */
+.code-panel {
+  overflow: hidden;
+}
+
+.code-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 6px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.code-head-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-title);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.code-head-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  flex: none;
+}
+
+.code-head-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.code-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.md-preview {
+  padding: 24px;
+}
+
+.code-truncated {
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--bg-secondary);
+}
+
+/* ---------- Pygments linenos=table 输出结构 ---------- */
+.hl {
+  background: var(--bg);
+}
+
+.hl table {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.hl td {
+  padding: 0;
+  vertical-align: top;
+  border: none;
+}
+
+.hl td.linenos {
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  user-select: none;
+}
+
+.hl .linenodiv pre {
+  margin: 0;
+  padding: 8px 0;
+}
+
+.hl .linenodiv a {
+  display: block;
+  padding: 0 12px;
+  min-width: 52px;
+  color: #a5adbb;
+  text-decoration: none;
+  text-align: right;
+}
+
+.hl .linenodiv a:hover {
+  color: var(--link);
+}
+
+.hl .highlight {
+  margin: 0;
+  background: var(--bg);
+}
+
+.hl .highlight pre {
+  margin: 0;
+  padding: 8px 16px;
+  color: #24292f;
+}
+
+/* 行锚点定位高亮：#L42 命中的行整行淡蓝 */
+.hl .highlight span:has(> a:target) {
+  display: block;
+  background: var(--selected);
+}
+
+.hl span:target,
+.hl a:target {
+  background: var(--selected);
+}
+
+/* ---------- 纯文本降级（超过高亮阈值） ---------- */
+.hl-plain pre {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.65;
+  overflow-x: auto;
+}
+
+.hl-plain code {
+  display: block;
+}
+
+.hl-plain code > span {
+  display: block;
+  padding-right: 16px;
+  white-space: pre;
+}
+
+.hl-plain code > span:target {
+  background: var(--selected);
+}
+
+.hl-plain .ln-no {
+  display: inline-block;
+  min-width: 64px;
+  padding: 0 12px;
+  text-align: right;
+  color: #a5adbb;
+  user-select: none;
+  background: var(--bg-secondary);
+}
+
+/* ---------- Pygments Token 配色（GitHub Light 风格） ---------- */
+.hl .c,
+.hl .cm,
+.hl .c1,
+.hl .cs,
+.hl .ch {
+  color: #6e7781;
+  font-style: italic;
+}
+
+.hl .k,
+.hl .kd,
+.hl .kn,
+.hl .kp,
+.hl .kr,
+.hl .ow {
+  color: #cf222e;
+}
+
+.hl .s,
+.hl .sa,
+.hl .sb,
+.hl .sc,
+.hl .dl,
+.hl .sd,
+.hl .s2,
+.hl .se,
+.hl .sh,
+.hl .si,
+.hl .sx,
+.hl .sr,
+.hl .s1,
+.hl .ss {
+  color: #0a3069;
+}
+
+.hl .m,
+.hl .mb,
+.hl .mf,
+.hl .mh,
+.hl .mi,
+.hl .il,
+.hl .mo {
+  color: #0550ae;
+}
+
+.hl .o {
+  color: #24292f;
+}
+
+.hl .nf,
+.hl .fm,
+.hl .nd {
+  color: #8250df;
+}
+
+.hl .nc,
+.hl .ne,
+.hl .nv,
+.hl .vc,
+.hl .vg,
+.hl .vi {
+  color: #953800;
+}
+
+.hl .nb,
+.hl .bp,
+.hl .nt {
+  color: #0550ae;
+}
+
+.hl .na {
+  color: #0550ae;
+}
+
+.hl .gh,
+.hl .gu {
+  color: #0550ae;
+  font-weight: 600;
+}
+
+.hl .gp {
+  color: #6e7781;
+}
+
+.hl .err {
+  color: #f6f8fa;
+  background-color: #82071e;
+}
+
+.hl .x {
+  color: #24292f;
+}
