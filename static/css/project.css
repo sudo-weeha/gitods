@@ -569,3 +569,166 @@
     padding: 16px 12px;
   }
 }
+
+/* ---------- 左侧文件树导航（进入目录/文件后替代简介栏） ---------- */
+.project-layout.layout-tree {
+  grid-template-columns: 280px minmax(0, 1fr);
+}
+
+.tree-panel {
+  overflow: auto;
+  max-height: calc(100vh - 140px);
+  position: sticky;
+  top: 16px;
+}
+
+.tree-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-title);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 1;
+}
+
+.tree-title-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--text-muted);
+}
+
+.tree-root-link {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.tree-root-link:hover {
+  color: var(--link);
+}
+
+.tree-list {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+}
+
+.tree-list .tree-list {
+  padding: 0 0 0 14px;
+}
+
+.tree-dir > details > summary {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 6px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.tree-dir > details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.tree-dir > details > summary:hover {
+  background: var(--bg-secondary);
+}
+
+.tree-toggle {
+  display: inline-flex;
+  align-items: center;
+  width: 14px;
+  flex: none;
+  color: #b8c0cc;
+}
+
+.tree-chev {
+  width: 12px;
+  height: 12px;
+  transition: transform 0.12s;
+}
+
+details[open] > summary .tree-chev {
+  transform: rotate(90deg);
+}
+
+.tree-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 3px 6px;
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 13px;
+  flex: 1;
+}
+
+.tree-file .tree-link {
+  color: var(--link);
+}
+
+.tree-link:hover {
+  background: var(--bg-secondary);
+  color: var(--link);
+}
+
+.tree-icon {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+
+.tree-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 当前条目：淡蓝底 + 橙色边缘标记（与分组导航一致） */
+.tree-file.is-current .tree-link,
+.tree-dir.is-current > details > summary .tree-link {
+  background: var(--selected);
+  color: var(--selected-text);
+  font-weight: 600;
+  position: relative;
+}
+
+.tree-file.is-current .tree-link::before,
+.tree-dir.is-current > details > summary .tree-link::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+@media (max-width: 1279px) {
+  .project-layout.layout-tree {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 1023px) {
+  .project-layout.layout-tree {
+    display: block;
+  }
+
+  .tree-panel {
+    position: static;
+    max-height: 40vh;
+    margin-bottom: 16px;
+  }
+}

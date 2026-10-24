@@ -38,7 +38,20 @@
       {% endif %}
     </div>
   </div>
-  <div class="project-layout">
+  <div class="project-layout{% if use_tree_layout %} layout-tree{% endif %}">
+    {% if use_tree_layout %}
+    <aside class="tree-panel panel" aria-label="文件树">
+      <div class="tree-title">
+        {% icon 'folder' 'tree-title-icon' %}<span>{{ project.slug }}</span>
+        <a class="tree-root-link" href="{% url 'project-home' group.slug project.slug %}?branch={{ branch.pk }}">根目录</a>
+      </div>
+      {% if tree %}
+        {% include "catalog/partials/file_tree.html" with nodes=tree %}
+      {% else %}
+        <div class="empty-state slim"><p>该分支没有文件</p></div>
+      {% endif %}
+    </aside>
+    {% endif %}
     <section class="project-main">
       {% if mode == 'missing' %}
       <div class="state-panel panel">
@@ -55,7 +68,9 @@
       {% include "catalog/partials/project_code.html" %}
       {% endif %}
     </section>
+    {% if not use_tree_layout %}
     {% include "catalog/partials/project_sidebar.html" %}
+    {% endif %}
   </div>
 </div>
 {% endblock %}

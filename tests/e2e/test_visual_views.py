@@ -51,6 +51,7 @@ def test_project_root_visual(page, live_server, seeded, width, height):
     _open(page, live_server, PROJECT_HOME, width, height)
     assert page.locator(".file-row").count() >= 4
     assert page.locator(".readme-panel").count() == 1
+    assert page.locator(".tree-panel").count() == 0  # 根页保持原布局
     assert "设备管理平台" in page.locator(".project-title").inner_text()
     _shot(page, "project", width)
 
@@ -61,4 +62,7 @@ def test_code_visual(page, live_server, seeded, width, height):
     _open(page, live_server, url, width, height)
     assert page.locator(".code-panel").count() == 1
     assert page.locator(".code-panel .linenodiv, .code-panel .ln-no").first.is_visible()
+    # 文件树导航：左树右内容联动，当前文件高亮
+    assert page.locator(".tree-panel").count() == 1
+    assert page.locator(".tree-file.is-current").count() == 1
     _shot(page, "code", width)

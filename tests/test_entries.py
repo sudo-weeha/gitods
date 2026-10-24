@@ -479,3 +479,40 @@ class TestAdminFilesViews:
             {"path": "", "expected_revision": "1"},
         )
         assert response.status_code in (302, 403)  # 未登录先跳登录，或 CSRF 拦截
+
+
+class TestFileTreeNavigation:
+    """左树右内容联动布局（用户需求）：进入目录/文件后显示树，根页保持简介栏。"""
+
+    def test_root_keeps_info_sidebar_no_tree(self, client, project, branch):
+        add_file(branch, "README.md", b"readme")
+        html = client.get(f"{PROJECT_URL}/?branch={branch.pk}").content.decode()
+        assert "tree-panel" not in html
+        assert "side-desc" in html  # 简介栏仍在
+
+    def test_nested_dir_shows_tree_with_sibling_links(self, client, project, branch):
+        add_dir(branch, "src")
+        add_file(branch, "src/app.py", b"x")
+        add_file(branch, "README.md", b"r")
+        html = client.get(f"{PROJECT_URL}/tree/src?branch={branch.pk}").content.decode()
+        assert 'aria-label="文件树"' in html
+        assert "side-desc" not in html  # 简介栏让位
+        assert "tree-dir is-current" in html  # 当前目录高亮
+        # 兄弟文件链接携带分支参数
+        assert f"/backend/device-platform/blob/src/app.py?branch={branch.pk}" in html
+        assert f"/backend/device-platform/blob/README.md?branch={branch.pk}" in html
+
+    def test_blob_page_expands_ancestors_and_highlights_file(self, client, project, branch):
+        add_dir(branch, "docs")
+        add_file(branch, "docs/note.md", b"# n")
+        html = client.get(f"{PROJECT_URL}/blob/docs/note.md?branch={branch.pk}").content.decode()
+        assert "tree-file is-current" in html
+        assert "<details open" in html  # 祖先目录展开
+
+    def test_tree_branch_isolation(self, client, project, branch):
+        add_file(branch, "only-main.txt", b"1")
+        empty = create_branch(project_id=project.id, name="tree-empty")
+        html = client.get(f"{PROJECT_URL}/blob/only-main.txt?branch={branch.pk}").content.decode()
+        assert "only-main.txt" in html
+        html2 = client.get(f"{PROJECT_URL}/?branch={empty.pk}").content.decode()
+        assert "only-main.txt" not in html2

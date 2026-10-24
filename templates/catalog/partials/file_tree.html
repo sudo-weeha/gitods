@@ -1,0 +1,24 @@
+{% load gitods gitods_icons %}
+<ul class="tree-list">
+  {% for node in nodes %}
+    {% if node.kind == 'dir' %}
+    <li class="tree-dir{% if node.current %} is-current{% endif %}">
+      <details {% if node.open %}open{% endif %}>
+        <summary title="{{ node.path }}">
+          <span class="tree-toggle" aria-hidden="true">{% icon 'chevron-right' 'tree-chev' %}</span>
+          <a class="tree-link" href="{% url 'project-tree' group.slug project.slug node.path %}?branch={{ branch.pk }}">
+            {% icon 'folder' 'tree-icon icon-dir' %}<span class="tree-name">{{ node.name }}</span>
+          </a>
+        </summary>
+        {% include "catalog/partials/file_tree.html" with nodes=node.children %}
+      </details>
+    </li>
+    {% else %}
+    <li class="tree-file{% if node.current %} is-current{% endif %}" title="{{ node.path }}">
+      <a class="tree-link" href="{% url 'project-blob' group.slug project.slug node.path %}?branch={{ branch.pk }}">
+        {% icon node.name|file_icon 'tree-icon icon-file' %}<span class="tree-name">{{ node.name }}</span>
+      </a>
+    </li>
+    {% endif %}
+  {% endfor %}
+</ul>

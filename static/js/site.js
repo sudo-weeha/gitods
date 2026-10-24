@@ -32,6 +32,14 @@
     }
   });
 
+  // 文件树：当前条目滚进可视区（页面加载时）
+  var currentTreeItem = document.querySelector(
+    ".tree-file.is-current .tree-link, .tree-dir.is-current > details > summary .tree-link"
+  );
+  if (currentTreeItem && currentTreeItem.scrollIntoView) {
+    currentTreeItem.scrollIntoView({ block: "nearest" });
+  }
+
   // 分支下拉的名称过滤
   document.addEventListener("input", function (event) {
     var input = event.target.closest ? event.target.closest("[data-filter-list]") : null;

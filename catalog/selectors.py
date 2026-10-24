@@ -112,3 +112,69 @@ def readonly_snapshot():
         with connection.cursor() as cursor:
             cursor.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
         yield
+
+
+def branch_tree(branch, current_path: str) -> list[dict]:
+    """整棵分支树（目录优先、自然排序），供文件导航面板渲染。
+
+    current_path 的祖先目录与该目录本身自动展开，当前条目高亮。
+    节点结构：{name, kind, path, open, current, children}。
+    """
+    nodes: dict[str, dict] = {}
+
+    def ensure_dir(path: str) -> dict:
+        node = nodes.get(path)
+        if node is None:
+            parts = path.split("/")
+            parent = ensure_dir("/".join(parts[:-1]))["children"] if len(parts) > 1 else root_children
+            node = {
+                "name": parts[-1], "kind": "dir", "path": path,
+                "open": False, "current": False, "children": [],
+            }
+            nodes[path] = node
+            parent.append(node)
+        return node
+
+    root_children: list[dict] = []
+    entries = Entry.objects.filter(branch=branch).only("path", "name", "kind")
+    for entry in entries:
+        if entry.kind == "dir":
+            ensure_dir(entry.path)
+        else:
+            parts = entry.path.split("/")
+            parent = ensure_dir("/".join(parts[:-1]))["children"] if len(parts) > 1 else root_children
+            parent.append({
+                "name": entry.name, "kind": "file", "path": entry.path,
+                "open": False, "current": False, "children": [],
+            })
+
+    def sort_children(children: list[dict]) -> None:
+        children.sort(
+            key=lambda n: (0 if n["kind"] == "dir" else 1, natural_key(n["name"]))
+        )
+        for child in children:
+            sort_children(child["children"])
+
+    sort_children(root_children)
+
+    # 展开当前路径：祖先链 + 当前目录本身；标记当前条目
+    if current_path:
+        parts = current_path.split("/")
+        for i in range(1, len(parts) + (0 if current_path.endswith("/") else 1)):
+            node = nodes.get("/".join(parts[:i]))
+            if node is not None:
+                node["open"] = True
+        node = nodes.get(current_path)
+        if node is not None:
+            node["current"] = True  # 目录：已在 nodes 里
+        else:
+            _mark_file_current(root_children, current_path)  # 文件：递归查找
+    return root_children
+
+
+def _mark_file_current(children: list[dict], path: str) -> None:
+    for child in children:
+        if child["path"] == path:
+            child["current"] = True
+            return
+        _mark_file_current(child["children"], path)

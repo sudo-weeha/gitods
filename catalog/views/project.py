@@ -88,7 +88,9 @@ def _breadcrumbs(project, branch, rel_path):
     return crumbs
 
 
-def _base_context(request, project, branch, mode, rel_path, branches, file_count):
+def _base_context(request, project, branch, mode, rel_path, branches, file_count, tree=None):
+    # 左侧文件树导航（用户需求：进入目录/文件后左树右内容联动，简介栏让位）
+    use_tree_layout = tree is not None
     return {
         "nav": "project",
         "project": project,
@@ -101,12 +103,14 @@ def _base_context(request, project, branch, mode, rel_path, branches, file_count
         "is_staff": request.user.is_staff,
         "mode": mode,
         "rel_path": rel_path,
+        "tree": tree,
+        "use_tree_layout": use_tree_layout,
         "branch_switch_base": _location_url(project, mode if mode != "missing" else "tree", rel_path),
     }
 
 
 def _render(request, project, branch, mode, rel_path, branches, file_count, **extra):
-    context = _base_context(request, project, branch, mode, rel_path, branches, file_count)
+    context = _base_context(request, project, branch, mode, rel_path, branches, file_count, tree=extra.pop("tree", None))
     context.update(extra)
     return render(request, "catalog/project.html", context)
 
@@ -160,6 +164,7 @@ def _tree(request, group_slug, project_slug, rel_path):
         readme = selectors.find_readme(branch) if not rel_path else None
         readme_sha = readme.blob.sha256 if readme is not None else None
         readme_error = False
+        tree = selectors.branch_tree(branch, rel_path) if rel_path else None
 
     readme_html = None
     if readme_sha is not None:
@@ -182,6 +187,7 @@ def _tree(request, group_slug, project_slug, rel_path):
         readme_html=readme_html,
         readme_error=readme_error,
         breadcrumbs=_breadcrumbs(project, branch, rel_path),
+        tree=tree,
     )
 
 
@@ -199,6 +205,7 @@ def project_blob(request, group_slug, project_slug, rel_path):
         entry = selectors.get_entry(branch, rel_path)
         branches = selectors.project_branches(project)
         file_count = selectors.count_entries(branch)
+        tree = selectors.branch_tree(branch, rel_path)
 
     if entry is None:
         return _missing(request, project, branch, rel_path, branches, file_count)
@@ -245,4 +252,5 @@ def project_blob(request, group_slug, project_slug, rel_path):
         raw_url=f"{raw_base}?branch={branch.pk}",
         raw_download_url=f"{raw_base}?branch={branch.pk}&dl=1",
         breadcrumbs=_breadcrumbs(project, branch, rel_path),
+        tree=tree,
     )
