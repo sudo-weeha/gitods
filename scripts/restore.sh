@@ -6,6 +6,10 @@
 set -euo pipefail
 
 COMPOSE_FILE="${COMPOSE_FILE:-compose.yaml}"
+
+sha256_compat() {
+    if command -v sha256sum >/dev/null 2>&1; then sha256sum "$@"; else shasum -a 256 "$@"; fi
+}
 BACKUP_DIR="${1:?用法: restore.sh <备份目录 gitods-YYYYmmdd-HHMMSS>}"
 APP_VERSION="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
 
@@ -14,7 +18,7 @@ cd "$(dirname "$0")/.."
 [ -f "$BACKUP_DIR/db.dump" ] && [ -f "$BACKUP_DIR/objects.tar.gz" ] || {
     echo "[恢复] 备份目录不完整：$BACKUP_DIR" >&2; exit 1;
 }
-( cd "$BACKUP_DIR" && sha256sum -c SHA256SUMS >/dev/null ) || {
+( cd "$BACKUP_DIR" && sha256_compat -c SHA256SUMS >/dev/null ) || {
     echo "[恢复] 校验和不匹配，备份可能损坏" >&2; exit 1;
 }
 

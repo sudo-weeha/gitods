@@ -102,4 +102,13 @@ docker compose up -d
 
 ## 8. 演练记录
 
-（首次部署后在此登记：日期、备份目录、恢复结果、核验项。隔离演练环境验证两分支不同 README、相对图片、目录浏览、ZIP 下载与容器重启数据留存。）
+**2026-10-24 容器全流程演练（本机 OrbStack，Docker Compose 生产编排）**
+
+- 镜像：`gitods-web`（python:3.12-slim-bookworm 构建）、`postgres:17.11-alpine`、`nginx:1.30.3`；应用角色 `gitods_app`（rolsuper=f，无 CREATEDB）
+- 部署步骤实测：`config --quiet` → `build` → `up -d db`（init-db.sh 自动建角色/库）→ `migrate` → `collectstatic`（176 文件）→ `check --deploy`（仅 W004/W008 两条文档化警告：HSTS 可选、HTTPS 跳转由 nginx TLS 模板承担）→ `createsuperuser` → `up -d`
+- 内容经真实服务创建（`scripts/drill_content.py`：ZIP 导入 main、复制 release-1.0、覆盖 README、设默认）
+- 备份：`backup.sh` 成功（停 web→pg_dump -Fc→objects 归档→meta/SHA256SUMS→自动恢复 web）；演练中验证了失败路径（脚本兼容性问题导致中途退出时 trap 正确恢复 web）
+- 灾难恢复：删除 objects/ 目录 + 重建数据库后 `restore.sh`：版本匹配→载入→restore_post（清会话/作废草稿）→check_storage「14 条目、5 对象、缺失 0、失配 0」；恢复后 HTTP 核验全部通过：分组/项目列表、main 与 release-1.0 不同 README、相对图片 raw（image/png）、中文目录、分支 ZIP 字节一致（`docs/架构说明.md`、README 内容逐一比对）
+- 重启留存：`docker compose down && up -d` 后 1 项目/2 分支/14 条目完好，check_storage 零缺失
+- 备份产物不入版本库（含数据库数据）；演练证据见 `docs/superpowers/plans/2026-10-24-gitods.md` 任务 10 验证记录
+- 未发布公网：无域名与服务器，本地演练即到此为止；上线按第 1 节在生产主机重复执行并登记新记录

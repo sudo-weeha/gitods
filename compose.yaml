@@ -47,7 +47,7 @@ services:
       GITODS_DOMAIN: ${GITODS_DOMAIN:?需要在 .env 提供 GITODS_DOMAIN}
     volumes:
       # HTTP 模板；生产 HTTPS 改挂 nginx-tls.conf.template（含证书卷，见 operations.md）
-      - ./deploy/nginx.conf.template:/etc/nginx/templates/gitods.conf.template:ro
+      - ./deploy/nginx.conf.template:/etc/nginx/templates/default.conf.template:ro
       - nginx_certs:/etc/nginx/certs
     depends_on:
       - web

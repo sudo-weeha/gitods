@@ -8,6 +8,11 @@ COMPOSE_FILE="${COMPOSE_FILE:-compose.yaml}"
 BACKUP_ROOT="${BACKUP_ROOT:-./backups}"
 KEEP="${KEEP:-7}"
 
+# sha256 工具跨平台：Linux 用 sha256sum，macOS 用 shasum
+sha256_compat() {
+    if command -v sha256sum >/dev/null 2>&1; then sha256sum "$@"; else shasum -a 256 "$@"; fi
+}
+
 cd "$(dirname "$0")/.."
 STAMP="$(date +%Y%m%d-%H%M%S)"
 DEST="$BACKUP_ROOT/gitods-$STAMP"
@@ -39,18 +44,19 @@ echo "[备份] 写入元数据与校验和"
     echo "app_version=$APP_VERSION"
     echo "created_at=$(date -Iseconds)"
     echo "pg_dump_format=custom"
-    du -b "$DEST/db.dump" "$DEST/objects.tar.gz" | awk '{print $2"="$1}'
+    echo "db.dump=$(wc -c < "$DEST/db.dump" | tr -d ' ')"
+    echo "objects.tar.gz=$(wc -c < "$DEST/objects.tar.gz" | tr -d ' ')"
 } > "$DEST/meta.txt"
-( cd "$DEST" && sha256sum db.dump objects.tar.gz > SHA256SUMS )
+( cd "$DEST" && sha256_compat db.dump objects.tar.gz > SHA256SUMS )
 
 # 完整性自检：dump 非空 + 校验和复核
 [ -s "$DEST/db.dump" ] || { echo "[备份] 失败：db.dump 为空" >&2; exit 1; }
-( cd "$DEST" && sha256sum -c SHA256SUMS >/dev/null ) || { echo "[备份] 失败：校验和不匹配" >&2; exit 1; }
+( cd "$DEST" && sha256_compat -c SHA256SUMS >/dev/null ) || { echo "[备份] 失败：校验和不匹配" >&2; exit 1; }
 
 restore_web
 trap - EXIT
 
 echo "[备份] 完成：$DEST"
 echo "[备份] 轮转：保留最近 $KEEP 份"
-ls -1dt "$BACKUP_ROOT"/gitods-* | tail -n +$((KEEP + 1)) | xargs -r rm -rf
+ls -1dt "$BACKUP_ROOT"/gitods-* 2>/dev/null | tail -n +$((KEEP + 1)) | while read -r old; do rm -rf "$old"; done
 echo "[备份] 提醒：将 $DEST 复制一份到其他磁盘/主机"

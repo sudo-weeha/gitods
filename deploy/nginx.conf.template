@@ -3,7 +3,7 @@
 # 生产直接上 HTTPS 请改挂 nginx-tls.conf.template（见 docs/operations.md）。
 server {
     listen 80;
-    listen 80 [::]:80;
+    listen [::]:80;
     server_name ${GITODS_DOMAIN} _;
 
     # 请求体上限 64 MiB：给 50 MiB 业务上限留 multipart 开销，
