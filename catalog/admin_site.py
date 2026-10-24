@@ -15,6 +15,12 @@ class GitODSAdminSite(admin.AdminSite):
     site_title = "GitODS 管理"
     index_title = "内容管理"
 
+    def get_urls(self):
+        # 延迟导入：调用时本模块与 admin_urls 均已完成初始化
+        from catalog.admin_urls import urlpatterns as catalog_admin_urls
+
+        return catalog_admin_urls + super().get_urls()
+
     def login(self, request, extra_context=None):
         if request.method == "POST":
             username = request.POST.get("username") or ""

@@ -1,0 +1,36 @@
+{% extends "admin/base_site.html" %}
+{% block title %}删除分支 · {{ branch.name }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">首页</a>
+  › <a href="{% url 'admin:catalog_project_change' project.pk %}">{{ project.name }}</a>
+  › <a href="{% url 'admin:catalog-project-branches' project.pk %}">分支管理</a>
+  › 删除 {{ branch.name }}
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <h1>删除分支 “{{ branch.name }}”</h1>
+  <p>该项目 <strong>{{ project.name }}</strong>（{{ project.group.name }}）。</p>
+  <p>该分支包含 <strong>{{ entry_count }}</strong> 个条目（含目录）。删除后：
+  {% if next %}你将从 <code>{{ next }}</code> 返回项目默认分支根目录。{% endif %}</p>
+  <p>文件对象按内容寻址共享：删除分支不会物理删除与其他分支共享的文件内容。</p>
+
+  {% if blockers %}
+  <ul class="errorlist">
+    {% for b in blockers %}<li>{{ b }}</li>{% endfor %}
+  </ul>
+  <p><a href="{% url 'admin:catalog-project-branches' project.pk %}">返回分支管理</a></p>
+  {% else %}
+  <form method="post">{% csrf_token %}
+    {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+    <div class="submit-row">
+      <input type="submit" value="确认删除" style="background:#82071e;color:#fff;">
+      <a href="{% url 'admin:catalog-project-branches' project.pk %}" class="button cancel-link">取消</a>
+    </div>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

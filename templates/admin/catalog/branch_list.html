@@ -1,0 +1,90 @@
+{% extends "admin/base_site.html" %}
+{% block title %}分支管理 · {{ project.name }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">首页</a>
+  › <a href="{% url 'admin:catalog_project_changelist' %}">项目</a>
+  › <a href="{% url 'admin:catalog_project_change' project.pk %}">{{ project.name }}</a>
+  › 分支管理
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <h1>{{ project.name }} · 分支管理
+    <span style="font-size:13px;font-weight:400;">
+      <a href="/{{ project.group.slug }}/{{ project.slug }}/" target="_blank" rel="noopener">查看公开页 ↗</a>
+    </span>
+  </h1>
+
+  {% if form.non_field_errors or form.name.errors %}
+  <ul class="errorlist">
+    {% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}
+    {% for e in form.name.errors %}<li>分支名：{{ e }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+
+  <form method="post" action="{% url 'admin:catalog-project-branch-create' project.pk %}"
+        onsubmit="var s=document.getElementById('id_source_branch');var r=document.getElementById('id_expected_revision');r.value=(s&&!s.disabled&&s.selectedOptions[0])?s.selectedOptions[0].dataset.rev:'';">
+    {% csrf_token %}
+    <fieldset class="module aligned">
+      <h2>创建分支</h2>
+      <div class="form-row">
+        <label>分支名：</label>{{ form.name }}
+        <p class="help">1–64 位小写字母、数字、点、下划线或连字符；创建后不可改名。</p>
+      </div>
+      <div class="form-row">
+        <label>来源：</label>
+        <label style="display:inline;"><input type="radio" name="mode" value="empty" checked
+          onchange="document.getElementById('id_source_branch').disabled=true">空分支</label>
+        {% if branches %}
+        <label style="display:inline;margin-left:12px;"><input type="radio" name="mode" value="copy"
+          onchange="document.getElementById('id_source_branch').disabled=false">从现有分支复制</label>
+        <select id="id_source_branch" name="source_branch" disabled style="margin-left:8px;">
+          {% for b in branches %}<option value="{{ b.pk }}" data-rev="{{ b.revision }}">{{ b.name }}</option>{% endfor %}
+        </select>
+        <input type="hidden" name="expected_revision" id="id_expected_revision" value="">
+        <p class="help">复制当前文件集合：两个分支之后完全独立，修改互不影响。</p>
+        {% endif %}
+      </div>
+    </fieldset>
+    <div class="submit-row">
+      <input type="submit" value="创建分支" class="default">
+    </div>
+  </form>
+
+  <div class="module">
+    <h2>分支列表（{{ branches|length }}）</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>名称</th><th>条目数</th><th>并发基准</th><th>创建时间</th><th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in branches %}
+        <tr>
+          <th>{{ b.name }}{% if b.pk == project.default_branch_id %} <span class="help" style="display:inline;">（默认）</span>{% endif %}</th>
+          <td>{{ b.entry_count }}</td>
+          <td>{{ b.revision }}</td>
+          <td>{{ b.created_at|date:"Y-m-d H:i" }}</td>
+          <td>
+            {% if b.pk != project.default_branch_id %}
+            <form method="post" action="{% url 'admin:catalog-project-branch-set-default' project.pk b.pk %}" style="display:inline;">{% csrf_token %}
+              <input type="submit" value="设为默认">
+            </form>
+            <form method="post" action="{% url 'admin:catalog-project-branch-delete' project.pk b.pk %}?next=/{{ project.group.slug }}/{{ project.slug }}/" style="display:inline;">{% csrf_token %}
+              <input type="submit" value="删除…">
+            </form>
+            {% else %}
+            <span class="help">默认分支</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
