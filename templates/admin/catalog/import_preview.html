@@ -1,0 +1,81 @@
+{% extends "admin/base_site.html" %}
+{% block title %}导入预览 · {{ project.name }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">首页</a>
+  › <a href="{% url 'admin:catalog_project_change' project.pk %}">{{ project.name }}</a>
+  › <a href="{% url 'admin:catalog-project-imports' project.pk %}?branch={{ branch.pk }}">导入 ZIP</a>
+  › 预览确认
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <h1>确认导入 · 分支 {{ branch.name }}</h1>
+
+  {% if messages %}
+  <ul class="messagelist">
+    {% for m in messages %}<li class="{{ m.tags }}">{{ m }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+
+  <div class="module" style="padding:12px 16px;">
+    <p><strong>替换范围：</strong>分支 <strong>{{ branch.name }}</strong> 现有
+      {{ current_entries }} 个条目将被删除，替换为 {{ file_count }} 个文件 + {{ dir_count }} 个目录
+      （合计 {{ total_size }} 字节）。其他分支不受影响。</p>
+    <p class="help">草稿创建时分支并发基准为 {{ draft.expected_revision }}；发布前再次核对，若分支已更新将拒绝发布。</p>
+    <p class="help">过期时间：{{ draft.expires_at|date:"Y-m-d H:i" }}（30 分钟内有效）。</p>
+  </div>
+
+  {% if common_root %}
+  <div class="module" style="padding:12px 16px;">
+    <p><strong>外层目录选项：</strong>压缩包有共同外层目录 <code>{{ common_root }}/</code>。</p>
+    <form method="post" action="{% url 'admin:catalog-project-import-option' project.pk draft.pk %}">
+      {% csrf_token %}
+      {% if draft.strip_root %}
+      <input type="hidden" name="strip_root" value="0">
+      <input type="submit" value="保留最外层目录 {{ common_root }}/（当前：已移除）">
+      {% else %}
+      <input type="hidden" name="strip_root" value="1">
+      <input type="submit" value="移除最外层目录 {{ common_root }}/（当前：保留）">
+      {% endif %}
+    </form>
+    <p class="help">切换后按服务器保存的原始清单重新生成预览；分支内容不变。</p>
+  </div>
+  {% endif %}
+
+  <div class="module">
+    <h2>导入后路径预览（前 60 项{% if more_count %}，还有 {{ more_count }} 项{% endif %}）</h2>
+    <table>
+      <thead><tr><th>路径</th><th>类型</th><th>大小</th></tr></thead>
+      <tbody>
+        {% for e in entries_preview %}
+        <tr><th><code>{{ e.path }}</code>{% if e.kind == 'dir' %}/{% endif %}</th><td>{{ e.kind }}</td><td>{{ e.size }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if excluded %}
+  <div class="module">
+    <h2>排除项（不会导入）</h2>
+    <ul style="margin:0 0 8px 18px;">
+      {% for x in excluded %}<li><code>{{ x.path }}</code> — {{ x.reason }}</li>{% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <div class="submit-row" style="border:none;">
+    <form method="post" action="{% url 'admin:catalog-project-import-publish' project.pk draft.pk %}" style="display:inline;">
+      {% csrf_token %}
+      <input type="submit" value="确认发布（替换整分支）" class="default">
+    </form>
+    <form method="post" action="{% url 'admin:catalog-project-import-cancel' project.pk draft.pk %}" style="display:inline;">
+      {% csrf_token %}
+      <input type="submit" value="取消导入" style="background:#82071e;color:#fff;">
+    </form>
+    <a class="button cancel-link" href="/{{ project.group.slug }}/{{ project.slug }}/?branch={{ branch.pk }}">返回项目页</a>
+  </div>
+</div>
+{% endblock %}

@@ -30,4 +30,9 @@ urlpatterns = [
         content.raw_file,
         name="project-raw",
     ),
+    path(
+        "<slug:group_slug>/<slug:project_slug>/download/",
+        content.branch_download,
+        name="project-download",
+    ),
 ]

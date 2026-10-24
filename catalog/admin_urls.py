@@ -8,6 +8,7 @@ from django.urls import path
 from catalog.admin_site import site
 from catalog.admin_views import branches as branch_views
 from catalog.admin_views import entries as file_views
+from catalog.admin_views import imports as import_views
 
 urlpatterns = [
     path(
@@ -55,5 +56,36 @@ urlpatterns = [
         "catalog/project/<uuid:project_id>/files/<uuid:entry_id>/delete/",
         site.admin_view(file_views.files_delete),
         name="catalog-project-files-delete",
+    ),
+    # ZIP 导入（两步：上传→预览确认→发布）
+    path(
+        "catalog/project/<uuid:project_id>/imports/",
+        site.admin_view(import_views.import_home),
+        name="catalog-project-imports",
+    ),
+    path(
+        "catalog/project/<uuid:project_id>/imports/new/",
+        site.admin_view(import_views.import_new),
+        name="catalog-project-import-new",
+    ),
+    path(
+        "catalog/project/<uuid:project_id>/imports/<uuid:draft_id>/",
+        site.admin_view(import_views.import_preview),
+        name="catalog-project-import-preview",
+    ),
+    path(
+        "catalog/project/<uuid:project_id>/imports/<uuid:draft_id>/option/",
+        site.admin_view(import_views.import_option),
+        name="catalog-project-import-option",
+    ),
+    path(
+        "catalog/project/<uuid:project_id>/imports/<uuid:draft_id>/publish/",
+        site.admin_view(import_views.import_publish),
+        name="catalog-project-import-publish",
+    ),
+    path(
+        "catalog/project/<uuid:project_id>/imports/<uuid:draft_id>/cancel/",
+        site.admin_view(import_views.import_cancel),
+        name="catalog-project-import-cancel",
     ),
 ]

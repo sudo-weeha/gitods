@@ -1,0 +1,90 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% block title %}导入 ZIP · {{ project.name }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">首页</a>
+  › <a href="{% url 'admin:catalog_project_change' project.pk %}">{{ project.name }}</a>
+  › 导入 ZIP（分支 {{ branch.name }}）
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <h1>导入 ZIP · {{ project.name }}
+    <span style="font-size:13px;font-weight:400;">
+      分支 <strong>{{ branch.name }}</strong>（并发基准 {{ revision }}，当前 {{ entry_count }} 个条目）·
+      <a href="{{ public_root }}" target="_blank" rel="noopener">查看公开页 ↗</a>
+    </span>
+  </h1>
+
+  {% if messages %}
+  <ul class="messagelist">
+    {% for m in messages %}<li class="{{ m.tags }}">{{ m }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+  {% if last_error %}
+  <ul class="errorlist"><li>{{ last_error }}</li>
+    {% if busy %}<li>服务器正在处理其他导入；稍等片刻后重新上传即可，分支内容未受影响。</li>{% endif %}
+  </ul>
+  {% endif %}
+
+  <div class="module" style="padding:12px 16px;">
+    <p><strong>导入会替换分支 {{ branch.name }} 的全部现有文件</strong>（当前 {{ entry_count }} 个条目），不影响其他分支。</p>
+    <ul style="margin:4px 0 0 18px;">
+      <li>压缩包 ≤ 50 MiB，解压后合计 ≤ 200 MiB，条目数 ≤ 10000（含目录）</li>
+      <li>自动排除 <code>.git/</code>、<code>.svn/</code>、<code>__MACOSX/</code>、<code>.DS_Store</code></li>
+      <li>拒绝包含 <code>.env</code> / <code>.env.*</code> 的压缩包（.env.example/.sample/.template 允许）</li>
+      <li>仅一个共同外层目录时默认移除该目录，预览页可切换</li>
+    </ul>
+  </div>
+
+  <form method="post" action="{% url 'admin:catalog-project-import-new' project.pk %}?branch={{ branch.pk }}"
+        enctype="multipart/form-data" id="upload-form">
+    {% csrf_token %}
+    <input type="hidden" name="branch" value="{{ branch.pk }}">
+    <input type="hidden" name="expected_revision" value="{{ revision }}">
+    <fieldset class="module aligned">
+      <h2>第一步：上传压缩包</h2>
+      <div class="form-row">
+        <label>ZIP 文件：</label>
+        <input type="file" name="zip" accept=".zip" required>
+      </div>
+    </fieldset>
+    <div id="upload-progress" style="display:none;margin:0 0 12px;">
+      <div style="border:1px solid #ccc;border-radius:4px;height:18px;background:#f7f8fa;overflow:hidden;">
+        <div class="progress-fill" style="height:100%;width:0;background:#ff6b00;transition:width .15s;"></div>
+      </div>
+      <p class="progress-text help" style="margin:4px 0 0;"></p>
+    </div>
+    <div class="submit-row"><input type="submit" value="上传并校验" class="default"></div>
+  </form>
+
+  {% if drafts %}
+  <div class="module">
+    <h2>最近的导入草稿</h2>
+    <table>
+      <thead><tr><th>目标分支</th><th>文件数</th><th>大小</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead>
+      <tbody>
+        {% for d in drafts %}
+        <tr>
+          <th>{{ d.branch.name }}</th>
+          <td>{{ d.file_count }}</td>
+          <td>{{ d.total_size }} B</td>
+          <td>{{ d.get_status_display }}{% if d.result %} — {{ d.result }}{% endif %}</td>
+          <td>{{ d.created_at|date:"Y-m-d H:i" }}</td>
+          <td>
+            {% if d.status == 'ready' %}
+            <a class="button" href="{% url 'admin:catalog-project-import-preview' project.pk d.pk %}">继续预览 / 发布</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+<script defer src="{% static 'js/uploads.js' %}"></script>
+{% endblock %}

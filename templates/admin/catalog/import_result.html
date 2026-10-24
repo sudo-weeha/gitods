@@ -1,0 +1,15 @@
+{% extends "admin/base_site.html" %}
+{% block title %}导入结果 · {{ draft.get_status_display }}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <h1>导入草稿 · {{ draft.get_status_display }}</h1>
+  <p>目标分支：{{ draft.branch.name }} · 文件数 {{ draft.file_count }} · 大小 {{ draft.total_size }} 字节</p>
+  {% if draft.result %}<p><strong>{{ draft.result }}</strong></p>{% endif %}
+  <p class="help">草稿不保留可恢复的历史版本；分支当前内容以公开页面为准。</p>
+  <p>
+    <a class="button" href="/admin/catalog/project/{{ project.pk }}/imports/?branch={{ draft.branch_id }}">返回导入页</a>
+    <a class="button" href="/{{ project.group.slug }}/{{ project.slug }}/?branch={{ draft.branch_id }}">查看分支</a>
+  </p>
+</div>
+{% endblock %}
