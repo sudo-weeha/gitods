@@ -1,0 +1,33 @@
+{% extends "admin/base_site.html" %}
+{% block title %}重命名 · {{ entry.name }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">首页</a>
+  › <a href="{% url 'admin:catalog_project_change' project.pk %}">{{ project.name }}</a>
+  › <a href="{% url 'admin:catalog-project-files' project.pk %}?branch={{ branch.pk }}&path={{ path|urlencode:'' }}">文件维护</a>
+  › 重命名
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <h1>重命名 {% if entry.kind == 'dir' %}目录{% else %}文件{% endif %} “{{ entry.name }}”</h1>
+  <p>完整路径：<code>{{ entry.path }}</code>{% if entry.kind == 'dir' %}/ — 改名会同步更新其下全部后代路径{% endif %}。只在当前父目录内改名，不移动位置。</p>
+  <form method="post">{% csrf_token %}
+    <input type="hidden" name="branch" value="{{ branch.pk }}">
+    <input type="hidden" name="path" value="{{ path }}">
+    <input type="hidden" name="expected_revision" value="{{ revision }}">
+    <fieldset class="module aligned">
+      <div class="form-row">
+        <label>新名称：</label>
+        <input type="text" name="new_name" value="{{ entry.name }}" maxlength="255" required style="width:32ch;">
+      </div>
+    </fieldset>
+    <div class="submit-row">
+      <input type="submit" value="确认重命名" class="default">
+      <a href="{% url 'admin:catalog-project-files' project.pk %}?branch={{ branch.pk }}&path={{ path|urlencode:'' }}" class="button cancel-link">取消</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

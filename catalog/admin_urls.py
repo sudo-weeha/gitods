@@ -7,6 +7,7 @@ from django.urls import path
 
 from catalog.admin_site import site
 from catalog.admin_views import branches as branch_views
+from catalog.admin_views import entries as file_views
 
 urlpatterns = [
     path(
@@ -28,5 +29,31 @@ urlpatterns = [
         "catalog/project/<uuid:project_id>/branches/<uuid:branch_id>/delete/",
         site.admin_view(branch_views.branch_delete),
         name="catalog-project-branch-delete",
+    ),
+    # 文件维护（上传、新建目录、重命名、删除）
+    path(
+        "catalog/project/<uuid:project_id>/files/",
+        site.admin_view(file_views.files_manage),
+        name="catalog-project-files",
+    ),
+    path(
+        "catalog/project/<uuid:project_id>/files/upload/",
+        site.admin_view(file_views.files_upload),
+        name="catalog-project-files-upload",
+    ),
+    path(
+        "catalog/project/<uuid:project_id>/files/folder/",
+        site.admin_view(file_views.files_folder),
+        name="catalog-project-files-folder",
+    ),
+    path(
+        "catalog/project/<uuid:project_id>/files/<uuid:entry_id>/rename/",
+        site.admin_view(file_views.files_rename),
+        name="catalog-project-files-rename",
+    ),
+    path(
+        "catalog/project/<uuid:project_id>/files/<uuid:entry_id>/delete/",
+        site.admin_view(file_views.files_delete),
+        name="catalog-project-files-delete",
     ),
 ]

@@ -24,11 +24,14 @@ def object_path(sha256: str) -> Path:
     return _data_root() / "objects" / sha256[:2] / sha256
 
 
-def store_blob(stream) -> Blob:
+def store_blob(stream, *, max_bytes: int | None = None) -> Blob:
     """分块读取流，写入私有临时文件后原子发布到哈希对象路径。
 
-    stream 必须是二进制文件对象；调用方负责限制读取总量。
+    stream 必须是二进制文件对象；max_bytes 按实际读到的字节数计数，
+    超限抛 CapacityExceeded（不信任客户端声明的大小）。
     """
+    from catalog.services.exceptions import CapacityExceeded
+
     digest = hashlib.sha256()
     size = 0
     tmp_dir = _data_root() / "tmp"
@@ -37,8 +40,10 @@ def store_blob(stream) -> Blob:
     try:
         with open(tmp_path, "wb") as out:
             while chunk := stream.read(CHUNK_SIZE):
-                digest.update(chunk)
                 size += len(chunk)
+                if max_bytes is not None and size > max_bytes:
+                    raise CapacityExceeded(f"内容超过 {max_bytes} 字节上限")
+                digest.update(chunk)
                 out.write(chunk)
             out.flush()
             os.fsync(out.fileno())

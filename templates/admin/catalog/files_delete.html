@@ -1,0 +1,31 @@
+{% extends "admin/base_site.html" %}
+{% block title %}删除 · {{ entry.name }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">首页</a>
+  › <a href="{% url 'admin:catalog_project_change' project.pk %}">{{ project.name }}</a>
+  › <a href="{% url 'admin:catalog-project-files' project.pk %}?branch={{ branch.pk }}&path={{ path|urlencode:'' }}">文件维护</a>
+  › 删除
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <h1>删除 {% if entry.kind == 'dir' %}目录{% else %}文件{% endif %} “{{ entry.name }}”</h1>
+  <p>完整路径：<code>{{ entry.path }}</code>{% if entry.kind == 'dir' %}/{% endif %}</p>
+  {% if entry.kind == 'dir' %}
+  <p>该目录包含 <strong>{{ descendant_count }}</strong> 个后代条目，删除后将一并移除。</p>
+  <p class="help">文件对象按内容寻址共享：与其他分支共享的文件内容不会被物理删除。</p>
+  {% endif %}
+  <form method="post">{% csrf_token %}
+    <input type="hidden" name="branch" value="{{ branch.pk }}">
+    <input type="hidden" name="path" value="{{ path }}">
+    <input type="hidden" name="expected_revision" value="{{ revision }}">
+    <div class="submit-row">
+      <input type="submit" value="确认删除" style="background:#82071e;color:#fff;">
+      <a href="{% url 'admin:catalog-project-files' project.pk %}?branch={{ branch.pk }}&path={{ path|urlencode:'' }}" class="button cancel-link">取消</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
