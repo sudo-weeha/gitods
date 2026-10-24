@@ -357,6 +357,11 @@ class Command(BaseCommand):
         if not settings.DEBUG and not options["force"]:
             raise CommandError("生产环境禁止执行 seed_demo：示例项目仅用于开发/验收")
         if options["reset"]:
+            # 与服务层一致的清理顺序：草稿 PROTECT → 默认分支关联 → 逐级删除
+            from catalog.models import ImportDraft
+
+            ImportDraft.objects.all().delete()
+            Project.objects.update(default_branch=None)
             Entry.objects.all().delete()
             Branch.objects.all().delete()
             Project.objects.all().delete()

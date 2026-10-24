@@ -103,6 +103,11 @@ class TestAdminServiceWiring:
 
         assert not Project.objects.filter(slug="explore").exists()
 
+    def test_change_pages_render(self, admin_client, group, project):
+        # 回归：prepopulated slug 与编辑页只读 slug 冲突曾致 500
+        assert admin_client.get(f"/admin/catalog/group/{group.pk}/change/").status_code == 200
+        assert admin_client.get(f"/admin/catalog/project/{project.pk}/change/").status_code == 200
+
     def test_delete_non_empty_group_blocked(self, admin_client, group, project):
         # 项目 FK 为 PROTECT：Admin 原生受保护对象页拒绝删除并列出项目
         response = admin_client.post(

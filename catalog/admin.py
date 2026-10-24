@@ -24,8 +24,11 @@ class GroupAdmin(admin.ModelAdmin):
     list_display = ("name", "slug", "sort_order", "project_count", "updated_at")
     search_fields = ("name", "slug")
     list_editable = ("sort_order",)
-    prepopulated_fields = {"slug": ("name",)}
     actions = None  # 禁用批量删除
+
+    def get_prepopulated_fields(self, request, obj=None):
+        # slug 仅新增页自动填充；编辑页 slug 只读，与 prepopulate 同用会 KeyError
+        return {"slug": ("name",)} if obj is None else {}
 
     @admin.display(description="项目数")
     def project_count(self, obj):
@@ -66,8 +69,11 @@ class ProjectAdmin(admin.ModelAdmin):
     list_filter = ("group",)
     list_select_related = ("group", "default_branch")
     search_fields = ("name", "slug", "description")
-    prepopulated_fields = {"slug": ("name",)}
     actions = None  # 禁用批量删除
+
+    def get_prepopulated_fields(self, request, obj=None):
+        # 同 GroupAdmin：编辑页 slug 只读，预填充只在新增页启用
+        return {"slug": ("name",)} if obj is None else {}
 
     def get_readonly_fields(self, request, obj=None):
         # default_branch 只能经专用服务（任务 4）修改；slug 创建后固定
