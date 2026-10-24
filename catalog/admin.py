@@ -18,17 +18,35 @@ from catalog.services import projects
 from catalog.services.exceptions import ServiceError
 
 
+def _catch_service_error(changelist_url_name):
+    """save_model 中服务层异常（表单校验漏掉的并发竞态）转错误提示而非 500。"""
+
+    def decorator(view_func):
+        def wrapper(self, request, *args, **kwargs):
+            try:
+                return view_func(self, request, *args, **kwargs)
+            except ServiceError as exc:
+                self.message_user(request, f"保存失败：{exc}", level=messages.ERROR)
+                return HttpResponseRedirect(reverse(changelist_url_name))
+
+        return wrapper
+
+    return decorator
+
+class SlugPrepopulateOnAddOnly:
+    """slug 自动填充仅在新增页：编辑页 slug 只读，与 prepopulate 同用会 KeyError。"""
+
+    def get_prepopulated_fields(self, request, obj=None):
+        return {"slug": ("name",)} if obj is None else {}
+
+
 @register(Group)
-class GroupAdmin(admin.ModelAdmin):
+class GroupAdmin(SlugPrepopulateOnAddOnly, admin.ModelAdmin):
     form = GroupForm
     list_display = ("name", "slug", "sort_order", "project_count", "updated_at")
     search_fields = ("name", "slug")
     list_editable = ("sort_order",)
     actions = None  # 禁用批量删除
-
-    def get_prepopulated_fields(self, request, obj=None):
-        # slug 仅新增页自动填充；编辑页 slug 只读，与 prepopulate 同用会 KeyError
-        return {"slug": ("name",)} if obj is None else {}
 
     @admin.display(description="项目数")
     def project_count(self, obj):
@@ -36,6 +54,14 @@ class GroupAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         return ("slug",) if obj else ()
+
+    @_catch_service_error("admin:catalog_group_changelist")
+    def add_view(self, request, form_url="", extra_context=None):
+        return super().add_view(request, form_url, extra_context)
+
+    @_catch_service_error("admin:catalog_group_changelist")
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        return super().change_view(request, object_id, form_url, extra_context)
 
     def save_model(self, request, obj, form, change):
         if not change:
@@ -63,7 +89,7 @@ class GroupAdmin(admin.ModelAdmin):
 
 
 @register(Project)
-class ProjectAdmin(admin.ModelAdmin):
+class ProjectAdmin(SlugPrepopulateOnAddOnly, admin.ModelAdmin):
     form = ProjectForm
     list_display = ("name", "group", "slug", "default_branch", "language", "updated_at")
     list_filter = ("group",)
@@ -71,14 +97,18 @@ class ProjectAdmin(admin.ModelAdmin):
     search_fields = ("name", "slug", "description")
     actions = None  # 禁用批量删除
 
-    def get_prepopulated_fields(self, request, obj=None):
-        # 同 GroupAdmin：编辑页 slug 只读，预填充只在新增页启用
-        return {"slug": ("name",)} if obj is None else {}
-
     def get_readonly_fields(self, request, obj=None):
         # default_branch 只能经专用服务（任务 4）修改；slug 创建后固定
         base = ("default_branch",)
         return base + ("slug",) if obj else base
+
+    @_catch_service_error("admin:catalog_project_changelist")
+    def add_view(self, request, form_url="", extra_context=None):
+        return super().add_view(request, form_url, extra_context)
+
+    @_catch_service_error("admin:catalog_project_changelist")
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        return super().change_view(request, object_id, form_url, extra_context)
 
     def save_model(self, request, obj, form, change):
         if not change:
@@ -107,6 +137,7 @@ class ProjectAdmin(admin.ModelAdmin):
         except ServiceError as exc:
             self.message_user(request, f"删除失败：{exc}", level=messages.ERROR)
             return HttpResponseRedirect(reverse("admin:catalog_project_changelist"))
+
 
 
 @register(Branch)

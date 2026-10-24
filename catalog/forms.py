@@ -55,6 +55,17 @@ class ProjectForm(forms.ModelForm):
             slug = cleaned.get("slug")
             if group and slug and Project.objects.filter(group=group, slug=slug).exists():
                 self.add_error("slug", f"该分组下已存在 URL 标识 “{slug}”")
+        else:
+            # 编辑页 slug 只读不在表单里，用实例值校验“移动分组”冲突
+            group = cleaned.get("group")
+            if (
+                group is not None
+                and group.pk != self.instance.group_id
+                and Project.objects.filter(group=group, slug=self.instance.slug)
+                .exclude(pk=self.instance.pk)
+                .exists()
+            ):
+                self.add_error("group", f"目标分组下已存在 URL 标识 “{self.instance.slug}”")
         return cleaned
 
 

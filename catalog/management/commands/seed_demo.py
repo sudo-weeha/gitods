@@ -10,7 +10,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 
-from catalog.models import Branch, Entry, Group, Project
+from catalog.models import Branch, Entry, Group, ImportDraft, Project
 from catalog.services.storage import store_bytes
 
 GROUPS = [
@@ -358,8 +358,6 @@ class Command(BaseCommand):
             raise CommandError("生产环境禁止执行 seed_demo：示例项目仅用于开发/验收")
         if options["reset"]:
             # 与服务层一致的清理顺序：草稿 PROTECT → 默认分支关联 → 逐级删除
-            from catalog.models import ImportDraft
-
             ImportDraft.objects.all().delete()
             Project.objects.update(default_branch=None)
             Entry.objects.all().delete()

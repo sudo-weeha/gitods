@@ -103,10 +103,45 @@ class TestAdminServiceWiring:
 
         assert not Project.objects.filter(slug="explore").exists()
 
-    def test_change_pages_render(self, admin_client, group, project):
+    def test_group_change_page_renders(self, admin_client, group):
         # 回归：prepopulated slug 与编辑页只读 slug 冲突曾致 500
         assert admin_client.get(f"/admin/catalog/group/{group.pk}/change/").status_code == 200
+
+    def test_project_change_page_renders(self, admin_client, project):
         assert admin_client.get(f"/admin/catalog/project/{project.pk}/change/").status_code == 200
+
+    def test_slug_prepopulate_only_on_add(self, group, project):
+        # 钉住修复保留的行为：新增页自动填充、编辑页关闭（与只读共存）
+        from django.test import RequestFactory
+
+        from catalog.admin import GroupAdmin, ProjectAdmin
+
+        request = RequestFactory().get("/")
+        assert GroupAdmin.get_prepopulated_fields(GroupAdmin, request, obj=None) == {"slug": ("name",)}
+        assert ProjectAdmin.get_prepopulated_fields(ProjectAdmin, request, obj=None) == {"slug": ("name",)}
+        assert GroupAdmin.get_prepopulated_fields(GroupAdmin, request, obj=group) == {}
+        assert ProjectAdmin.get_prepopulated_fields(ProjectAdmin, request, obj=project) == {}
+
+    def test_move_to_conflicting_group_shows_form_error(self, admin_client, project, group):
+        # 回归：移动分组冲突曾因服务层异常未接住而 500
+        from catalog.services.projects import create_group, create_project
+
+        other = create_group(name="前端组件", slug="frontend")
+        create_project(group=other, name="占位", slug=project.slug)
+        response = admin_client.post(
+            f"/admin/catalog/project/{project.pk}/change/",
+            {
+                "group": str(other.pk),
+                "name": project.name,
+                "description": project.description,
+                "language": project.language,
+                "license_name": project.license_name,
+            },
+        )
+        assert response.status_code == 200  # 表单错误重渲染，而非 500
+        assert "已存在" in response.content.decode()
+        project.refresh_from_db()
+        assert project.group_id == group.pk  # 未产生半移动
 
     def test_delete_non_empty_group_blocked(self, admin_client, group, project):
         # 项目 FK 为 PROTECT：Admin 原生受保护对象页拒绝删除并列出项目
