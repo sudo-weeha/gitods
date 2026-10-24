@@ -7,6 +7,7 @@
 """
 import uuid
 
+from django.conf import settings
 from django.http import Http404
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -214,7 +215,17 @@ def project_blob(request, group_slug, project_slug, rel_path):
     markdown_html = None
     is_markdown = entry.name.lower().endswith(tuple(MARKDOWN_EXTS))
     if is_markdown and not rendered.binary and not rendered.too_large:
-        markdown_html = rendering.render_markdown(data.decode("utf-8"), branch, entry.path).html
+        try:
+            markdown_html = rendering.render_markdown(
+                data.decode("utf-8"), branch, entry.path
+            ).html
+        except UnicodeDecodeError:
+            markdown_html = None  # 非 UTF-8 Markdown：显示源码/下载状态
+
+    is_image = (
+        entry.name.lower().endswith((".png", ".jpg", ".jpeg", ".webp"))
+        and entry.size <= settings.GITODS_LIMITS["IMAGE_MAX_BYTES"]
+    )
 
     raw_base = reverse("project-raw", args=[group_slug, project_slug, rel_path])
     return _render(
@@ -229,6 +240,7 @@ def project_blob(request, group_slug, project_slug, rel_path):
         rendered=rendered,
         markdown_html=markdown_html,
         is_markdown=is_markdown,
+        is_image=is_image,
         show_source=request.GET.get("view") == "source",
         raw_url=f"{raw_base}?branch={branch.pk}",
         raw_download_url=f"{raw_base}?branch={branch.pk}&dl=1",

@@ -15,7 +15,10 @@ from catalog.models import Branch, Project
 from catalog.services import downloads as download_service
 from catalog.services.exceptions import ValidationError
 from catalog.services.paths import normalize_path
-from catalog.services.storage import object_path
+from catalog.services.storage import object_path, read_object_bytes
+
+IMAGE_TYPES = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp"}
+PILLOW_FORMATS = {"PNG", "JPEG", "WEBP"}
 
 TEXT_SUFFIXES = {
     ".txt", ".md", ".markdown", ".rst", ".log", ".py", ".js", ".ts", ".tsx", ".jsx",
@@ -69,6 +72,10 @@ def raw_file(request, group_slug, project_slug, rel_path):
     suffix = Path(entry.name).suffix.lower()
     as_download = request.GET.get("dl") == "1"
     is_text = suffix in TEXT_SUFFIXES
+
+    # 受控图片预览：PNG/JPEG/WebP 经 Pillow 实际格式与像素数校验后 inline
+    if suffix in IMAGE_TYPES and not as_download:
+        return _image_response(entry, suffix)
 
     response = FileResponse(
         open(object_path(entry.blob.sha256), "rb"),
@@ -133,4 +140,43 @@ def branch_download(request, group_slug, project_slug):
         content_type="application/zip",
     )
     response["X-Content-Type-Options"] = "nosniff"
+    return response
+
+
+def _image_response(entry, suffix: str):
+    """图片 inline 仅在实际格式与像素数通过校验时提供；否则按附件。"""
+    import io
+
+    from django.conf import settings
+    from PIL import Image
+
+    limits = settings.GITODS_LIMITS
+    headers = {"X-Content-Type-Options": "nosniff"}
+    if entry.size > limits["IMAGE_MAX_BYTES"]:
+        return _binary_attachment(entry, headers)
+    data = read_object_bytes(entry.blob.sha256)
+    try:
+        with Image.open(io.BytesIO(data)) as image:
+            fmt = image.format
+            width, height = image.size
+        if fmt in PILLOW_FORMATS and width * height <= limits["IMAGE_MAX_PIXELS"]:
+            response = FileResponse(
+                io.BytesIO(data), content_type=IMAGE_TYPES[suffix]
+            )
+            for key, value in headers.items():
+                response[key] = value
+            return response
+    except Exception:
+        pass  # 损坏或无法识别的图片按二进制附件处理
+    return _binary_attachment(entry, headers)
+
+
+def _binary_attachment(entry, headers):
+    response = FileResponse(
+        open(object_path(entry.blob.sha256), "rb"),
+        content_type="application/octet-stream",
+    )
+    response["Content-Disposition"] = _safe_disposition(entry.name)
+    for key, value in headers.items():
+        response[key] = value
     return response

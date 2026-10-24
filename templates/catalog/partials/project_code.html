@@ -22,6 +22,10 @@
       <p class="empty-hint">大小 {{ entry.size|filesize }}，请下载后查看</p>
       <a class="btn btn-primary" href="{{ raw_download_url }}">{% icon 'download' %}下载文件</a>
     </div>
+    {% elif is_image %}
+    <div class="image-preview">
+      <img src="{{ raw_url }}" alt="{{ entry.name }}" loading="lazy">
+    </div>
     {% elif rendered.binary %}
     <div class="empty-state">
       {% icon 'image' 'empty-icon' %}
