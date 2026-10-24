@@ -1,0 +1,22 @@
+# 开发用 PostgreSQL（可选）。
+# 本机已有可复用的 PostgreSQL 容器（如 OrbStack）时，不必启动本文件：
+# 直接在 .env 的 DATABASE_URL 指向现有实例即可。
+services:
+  db:
+    image: postgres:17.11-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-gitods}
+      POSTGRES_USER: ${POSTGRES_USER:-gitods_app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?需要在 .env 提供 POSTGRES_PASSWORD}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - gitods-dev-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gitods_app} -d ${POSTGRES_DB:-gitods}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  gitods-dev-pgdata:
