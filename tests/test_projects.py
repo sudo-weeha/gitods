@@ -19,7 +19,7 @@ class TestCreateProject:
     def test_creates_default_main(self, group):
         project = create_project(
             group=group, name="设备管理平台", slug="device-platform",
-            description="物联网设备管理", language="Java", license_name="Apache-2.0",
+            description="物联网设备管理", language="Java",
         )
         assert project.default_branch is not None
         assert project.default_branch.name == "main"

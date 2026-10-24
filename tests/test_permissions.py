@@ -77,7 +77,6 @@ class TestAdminServiceWiring:
                 "slug": "new-project",
                 "description": "描述",
                 "language": "Python",
-                "license_name": "MIT",
             },
         )
         assert response.status_code == 302
@@ -94,7 +93,6 @@ class TestAdminServiceWiring:
                 "slug": "explore",
                 "description": "",
                 "language": "",
-                "license_name": "",
             },
         )
         assert response.status_code == 200  # 表单报错重渲染
@@ -135,7 +133,6 @@ class TestAdminServiceWiring:
                 "name": project.name,
                 "description": project.description,
                 "language": project.language,
-                "license_name": project.license_name,
             },
         )
         assert response.status_code == 200  # 表单错误重渲染，而非 500

@@ -53,7 +53,6 @@ class Project(models.Model):
     slug = models.SlugField("URL 标识", max_length=50, validators=[slug_validator])
     description = models.CharField("简介", max_length=500, blank=True, default="")
     language = models.CharField("主语言", max_length=64, blank=True, default="")
-    license_name = models.CharField("许可证", max_length=100, blank=True, default="")
     # 数据库允许为空，用于创建与删除的中间步骤；正常存活项目一定有默认分支，
     # 由服务层保证，普通 Admin 表单不可编辑该字段。
     default_branch = models.ForeignKey(

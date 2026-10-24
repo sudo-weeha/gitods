@@ -209,18 +209,14 @@ def _readme(title: str, desc: str, lang: str, extra: str = "") -> str:
 - 完整的类型标注与单元测试
 - 详细的部署文档
 
-{extra}
-## 许可证
-
-以仓库根目录 LICENSE 文件为准。
-"""
+{extra}"""
 
 
 PROJECTS = [
     {
         "group": "backend", "name": "设备管理平台", "slug": "device-platform",
         "desc": "面向园区与工厂场景的物联网设备管理平台：统一接入不同厂商网关与传感器，提供规则引擎、告警策略与固件灰度升级，支持百万级设备长连接与影子状态同步。",
-        "lang": "Java", "license": "Apache-2.0", "hours_ago": 2,
+        "lang": "Java", "hours_ago": 2,
         "dirs": ["src", "src/rules", "config", "docs"],
         "files": [
             ("README.md", README_MAIN),
@@ -236,77 +232,77 @@ PROJECTS = [
     {
         "group": "backend", "name": "订单结算中心", "slug": "order-settlement",
         "desc": "承接商城、门店与第三方渠道的订单资金结算：分账、对账与发票流转，幂等接口保证重复回调安全。",
-        "lang": "Java", "license": "MIT", "hours_ago": 5,
+        "lang": "Java", "hours_ago": 5,
         "dirs": ["docs"],
         "files": [("README.md", _readme("订单结算中心", "多渠道订单分账与对账服务。", "Java"))],
     },
     {
         "group": "backend", "name": "用户认证服务", "slug": "user-auth-service",
         "desc": "轻量统一认证：多租户、多因素登录、设备指纹与会话风控，兼容 OIDC 协议。",
-        "lang": "Go", "license": "Apache-2.0", "hours_ago": 26,
+        "lang": "Go", "hours_ago": 26,
         "dirs": [],
         "files": [("README.md", _readme("用户认证服务", "多租户统一认证与 OIDC 兼容服务。", "Go"))],
     },
     {
         "group": "frontend", "name": "数据表格组件库", "slug": "data-table-kit",
         "desc": "高性能表格组件：虚拟滚动、列固定、单元格编辑与服务端分页，适配主流 Vue 3 生态。",
-        "lang": "TypeScript", "license": "MIT", "hours_ago": 8,
+        "lang": "TypeScript", "hours_ago": 8,
         "dirs": [],
         "files": [("README.md", _readme("数据表格组件库", "虚拟滚动与可编辑单元格的 Vue 3 表格组件。", "TS"))],
     },
     {
         "group": "frontend", "name": "可视化表单设计器", "slug": "form-designer",
         "desc": "拖拽式表单设计器：20 余种控件、条件显隐与校验规则配置，Schema 可导入导出。",
-        "lang": "Vue", "license": "MIT", "hours_ago": 49,
+        "lang": "Vue", "hours_ago": 49,
         "dirs": [],
         "files": [("README.md", _readme("可视化表单设计器", "拖拽式低代码表单设计与渲染。", "Vue"))],
     },
     {
         "group": "mobile", "name": "门店巡检 App", "slug": "store-inspector",
         "desc": "连锁门店巡检客户端：离线任务、扫码点名、拍照回传与整改闭环。",
-        "lang": "Kotlin", "license": "Apache-2.0", "hours_ago": 72,
+        "lang": "Kotlin", "hours_ago": 72,
         "dirs": [],
         "files": [("README.md", _readme("门店巡检 App", "离线优先的连锁门店巡检客户端。", "Kotlin"))],
     },
     {
         "group": "mobile", "name": "消息推送 SDK", "slug": "push-sdk",
         "desc": "Flutter 消息推送 SDK：厂商通道聚合、到达回执与角标同步。",
-        "lang": "Dart", "license": "BSD-3-Clause", "hours_ago": 10,
+        "lang": "Dart", "hours_ago": 10,
         "dirs": [],
         "files": [("README.md", _readme("消息推送 SDK", "聚合厂商通道的 Flutter 推送 SDK。", "Dart"))],
     },
     {
         "group": "data-algo", "name": "日志检索引擎", "slug": "log-search",
         "desc": "面向可观测性的列式日志检索：倒排 + 分区裁剪，秒级查询十亿行日志。",
-        "lang": "Rust", "license": "Apache-2.0", "hours_ago": 120,
+        "lang": "Rust", "hours_ago": 120,
         "dirs": [],
         "files": [("README.md", _readme("日志检索引擎", "列式存储的轻量日志检索引擎。", "Rust"))],
     },
     {
         "group": "data-algo", "name": "推荐召回服务", "slug": "recall-service",
         "desc": "多路召回编排：向量近邻、行为共现与运营位混合，支持 A/B 分流。",
-        "lang": "Python", "license": "Apache-2.0", "hours_ago": 6,
+        "lang": "Python", "hours_ago": 6,
         "dirs": [],
         "files": [("README.md", _readme("推荐召回服务", "多路召回与混排服务。", "Python"))],
     },
     {
         "group": "devtools", "name": "接口调试工具", "slug": "api-debugger",
         "desc": "命令行接口调试工具：环境变量、断言脚本与请求录制回放。",
-        "lang": "Go", "license": "MIT", "hours_ago": 200,
+        "lang": "Go", "hours_ago": 200,
         "dirs": [],
         "files": [("README.md", _readme("接口调试工具", "可脚本化的 HTTP 接口调试 CLI。", "Go"))],
     },
     {
         "group": "docs", "name": "部署运维手册集", "slug": "deploy-handbook",
         "desc": "团队内部部署与运维手册合集：上线检查单、故障复盘模板与值班手册。",
-        "lang": "Markdown", "license": "CC-BY-4.0", "hours_ago": 300,
+        "lang": "Markdown", "hours_ago": 300,
         "dirs": [],
         "files": [("README.md", _readme("部署运维手册集", "上线检查单与值班手册合集。", "Markdown"))],
     },
     {
         "group": "ops", "name": "监控告警网关", "slug": "monitor-gateway",
         "desc": "统一告警网关：聚合 Prometheus 与日志告警，按值班表分级路由到电话、IM 与工单。",
-        "lang": "Go", "license": "Apache-2.0", "hours_ago": 96,
+        "lang": "Go", "hours_ago": 96,
         "dirs": [],
         "files": [("README.md", _readme("监控告警网关", "多源告警聚合与值班路由。", "Go"))],
     },
@@ -382,7 +378,6 @@ class Command(BaseCommand):
                 slug=spec["slug"],
                 description=spec["desc"],
                 language=spec["lang"],
-                license_name=spec["license"],
             )
             main = Branch.objects.create(project=project, name="main")
             Project.objects.filter(pk=project.pk).update(default_branch=main)

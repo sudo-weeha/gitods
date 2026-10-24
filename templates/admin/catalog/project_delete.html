@@ -1,0 +1,41 @@
+{% extends "admin/base_site.html" %}
+{% block title %}删除项目 · {{ project.name }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">首页</a>
+  › <a href="{% url 'admin:catalog_project_changelist' %}">项目</a>
+  › {{ project.name }} › 删除
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <h1>删除项目 “{{ project.name }}”</h1>
+  <p>所属分组：{{ project.group.name }}（{{ project.group.slug }}）。</p>
+  <p>将一并删除：<strong>{{ counts.branches }}</strong> 个分支、
+     <strong>{{ counts.entries }}</strong> 个文件/目录条目及全部元数据。</p>
+  <p class="help">按内容寻址的文件对象不随删除清理，由停机维护命令回收；此操作不可撤销。</p>
+
+  {% if messages %}
+  <ul class="messagelist">
+    {% for m in messages %}<li class="{{ m.tags }}">{{ m }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+
+  <form method="post">{% csrf_token %}
+    <fieldset class="module aligned">
+      <div class="form-row">
+        <label>输入项目名称确认：</label>
+        <input type="text" name="confirm_name" autocomplete="off" required
+               placeholder="{{ project.name }}" style="width:24ch;">
+        <p class="help">必须与项目名完全一致（区分大小写）。</p>
+      </div>
+    </fieldset>
+    <div class="submit-row">
+      <input type="submit" value="确认删除项目" style="background:#82071e;color:#fff;">
+      <a href="{% url 'admin:catalog_project_change' project.pk %}" class="button cancel-link">取消</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

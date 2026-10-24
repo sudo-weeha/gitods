@@ -57,7 +57,7 @@ def main() -> None:
     project = create_project(
         group=group, name="演练项目", slug="drill-app",
         description="备份恢复演练：两分支不同 README、相对图片、目录与 ZIP。",
-        language="Python", license_name="Apache-2.0",
+        language="Python",
     )
     main_branch = project.default_branch
 

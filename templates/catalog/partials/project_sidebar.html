@@ -7,7 +7,6 @@
       <dl class="side-list">
         <div class="side-row"><dt>分组</dt><dd><a href="/explore/?group={{ group.slug }}">{{ group.name }}</a></dd></div>
         {% if project.language %}<div class="side-row"><dt>主语言</dt><dd><span class="lang-dot" style="background: {{ project.language|lang_color }}"></span>{{ project.language }}</dd></div>{% endif %}
-        {% if project.license_name %}<div class="side-row"><dt>许可证</dt><dd>{{ project.license_name }}</dd></div>{% endif %}
         <div class="side-row"><dt>当前分支文件数</dt><dd>{{ file_count }}</dd></div>
         <div class="side-row"><dt>更新时间</dt><dd title="{{ project.updated_at|fulltime }}">{{ project.updated_at|reltime }}</dd></div>
       </dl>

@@ -70,7 +70,7 @@ def delete_group(*, group_id) -> None:
 
 # ---------- 项目 ----------
 
-def create_project(*, group, name, slug, description="", language="", license_name="") -> Project:
+def create_project(*, group, name, slug, description="", language="") -> Project:
     """创建项目并自动生成默认 main 分支（同一事务）。"""
     name = (name or "").strip()
     if not 1 <= len(name) <= 80:
@@ -86,7 +86,6 @@ def create_project(*, group, name, slug, description="", language="", license_na
             slug=slug,
             description=(description or "")[:500],
             language=(language or "")[:64],
-            license_name=(license_name or "")[:100],
             default_branch=None,  # 先建项目再关联，事务内完成
         )
         project.save()

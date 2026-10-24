@@ -37,7 +37,7 @@ class GroupForm(forms.ModelForm):
 class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
-        fields = ["group", "name", "slug", "description", "language", "license_name"]
+        fields = ["group", "name", "slug", "description", "language"]
 
     def clean_slug(self):
         slug = self.cleaned_data["slug"]

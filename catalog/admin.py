@@ -13,7 +13,7 @@ from django.urls import reverse
 
 from catalog.admin_site import register
 from catalog.forms import GroupForm, ProjectForm
-from catalog.models import Branch, Group, Project
+from catalog.models import Branch, Entry, Group, Project
 from catalog.services import projects
 from catalog.services.exceptions import ServiceError
 
@@ -118,7 +118,6 @@ class ProjectAdmin(SlugPrepopulateOnAddOnly, admin.ModelAdmin):
                 slug=obj.slug,
                 description=obj.description,
                 language=obj.language,
-                license_name=obj.license_name,
             )
             obj.pk = created.pk
             obj.default_branch = created.default_branch
@@ -128,15 +127,44 @@ class ProjectAdmin(SlugPrepopulateOnAddOnly, admin.ModelAdmin):
                 projects.move_project(project_id=obj.pk, target_group_id=obj.group_id)
             obj.save()
 
-    def delete_model(self, request, obj):
-        projects.delete_project(project_id=obj.pk)
-
     def delete_view(self, request, object_id, extra_context=None):
-        try:
-            return super().delete_view(request, object_id, extra_context)
-        except ServiceError as exc:
-            self.message_user(request, f"删除失败：{exc}", level=messages.ERROR)
+        """项目删除需输入项目名称确认；一次操作删除全部分支与文件元数据。"""
+        from django.shortcuts import get_object_or_404, render
+
+        from catalog.models import Project as ProjectModel
+
+        project = ProjectModel.objects.select_related("group").filter(pk=object_id).first()
+        if project is None:
+            self.message_user(request, "项目不存在或已被删除。", level=messages.WARNING)
             return HttpResponseRedirect(reverse("admin:catalog_project_changelist"))
+        if request.method == "POST":
+            if request.POST.get("confirm_name") != project.name:
+                self.message_user(
+                    request,
+                    f"输入的名称与项目名 “{project.name}” 不一致，未删除。",
+                    level=messages.ERROR,
+                )
+                return HttpResponseRedirect(
+                    reverse("admin:catalog_project_delete", args=[project.pk])
+                )
+            try:
+                projects.delete_project(project_id=project.pk)
+                self.message_user(request, f"项目 “{project.name}” 已删除。")
+                return HttpResponseRedirect(reverse("admin:catalog_project_changelist"))
+            except ServiceError as exc:
+                self.message_user(request, f"删除失败：{exc}", level=messages.ERROR)
+                return HttpResponseRedirect(
+                    reverse("admin:catalog_project_change", args=[project.pk])
+                )
+        counts = {
+            "branches": project.branches.count(),
+            "entries": Entry.objects.filter(branch__project=project).count(),
+        }
+        return render(
+            request,
+            "admin/catalog/project_delete.html",
+            {"project": project, "group": project.group, **self.admin_site.each_context(request), "counts": counts, "title": "删除项目"},
+        )
 
 
 
