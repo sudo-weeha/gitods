@@ -1,7 +1,7 @@
 # GitODS 运维手册
 
-架构：单机 Docker Compose（`web` Django/Gunicorn + `db` PostgreSQL 17 + `caddy` HTTPS 反代）。
-数据持久化：`pgdata`（数据库）、`appdata`（`/data/gitods`：不可变对象、临时文件、文件锁）、`caddy_data`（证书）。
+架构：单机 Docker Compose（`web` Django/Gunicorn + `db` PostgreSQL 17 + `nginx` 反向代理）。
+数据持久化：`pgdata`（数据库）、`appdata`（`/data/gitods`：不可变对象、临时文件、文件锁）、`nginx_certs`（TLS 证书，启用 HTTPS 时）。
 
 ## 1. 首次部署
 
@@ -14,15 +14,32 @@ docker compose run --rm web python manage.py migrate          # 迁移（显式�
 docker compose run --rm web python manage.py collectstatic --noinput
 docker compose run --rm web python manage.py check --deploy   # 生产检查
 docker compose run --rm web python manage.py createsuperuser  # 管理员（无默认账号密码）
-docker compose up -d                 # 启动 web + caddy（HTTP→HTTPS 自动证书）
+docker compose up -d                 # 启动 web + nginx（默认 HTTP；上 HTTPS 见下节）
 curl -fsS http://localhost/healthz/  # 健康检查 {"status":"ok"}
 ```
 
 注意：
 
 - **不要**自动加载演示数据；`seed_demo` 仅限开发环境（生产 `DEBUG=False` 拒绝执行）。
-- `DATA_ROOT`（`/data/gitods`）是私有目录，永不作为静态目录公开，也不经 Caddy 直读。
-- 请求体上限：Caddy `max_size 64MB`（给 50 MiB 业务上限留 multipart 开销）；应用内仍按实际读入字节执行单文件/批次/解压限制。
+- `DATA_ROOT`（`/data/gitods`）是私有目录，永不作为静态目录公开，也不经 nginx 直读。
+- 请求体上限：nginx `client_max_body_size 64m`（给 50 MiB 业务上限留 multipart 开销）；应用内仍按实际读入字节执行单文件/批次/解压限制。
+
+### 启用 HTTPS（生产）
+
+nginx 不自动签发证书，需一次性配置：
+
+```bash
+# 1) 宿主机用 certbot webroot 签发（DNS 先指向本机）
+certbot certonly --webroot -w /var/www/certbot -d <域名>
+# 2) 证书放入卷（或直接改挂宿主机路径）
+docker cp /etc/letsencrypt/live/<域名>/fullchain.pem $(docker compose ps -q nginx):/etc/nginx/certs/
+docker cp /etc/letsencrypt/live/<域名>/privkey.pem  $(docker compose ps -q nginx):/etc/nginx/certs/
+# 3) 换挂 TLS 模板：compose.yaml 中 nginx 服务的挂载改为
+#    ./deploy/nginx-tls.conf.template:/etc/nginx/templates/gitods.conf.template:ro
+#    并在 .env 设置 SECURE_HSTS_SECONDS=31536000
+docker compose up -d nginx
+# 4) 证书自动续期：宿主机 crontab 执行 certbot renew && docker cp ... && docker compose exec nginx nginx -s reload
+```
 
 ## 2. 日常操作
 

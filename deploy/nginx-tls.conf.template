@@ -1,0 +1,45 @@
+# GitODS 反向代理（生产 HTTPS 模板，envsubst 渲染 GITODS_DOMAIN）。
+# 启用步骤见 docs/operations.md：certbot 签发证书 → 挂载证书卷 → 改挂本模板。
+server {
+    listen 80;
+    listen 80 [::]:80;
+    server_name ${GITODS_DOMAIN};
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    listen 443 ssl [::]:443;
+    http2 on;
+    server_name ${GITODS_DOMAIN};
+
+    # certbot 挂载路径（compose 里映射到 /etc/nginx/certs）
+    ssl_certificate     /etc/nginx/certs/fullchain.pem;
+    ssl_certificate_key /etc/nginx/certs/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:SSL:10m;
+
+    client_max_body_size 64m;
+
+    gzip on;
+    gzip_types text/plain text/css text/javascript application/json image/svg+xml;
+
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+
+    location / {
+        proxy_pass http://web:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_read_timeout 120s;
+    }
+}

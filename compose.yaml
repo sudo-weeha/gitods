@@ -1,4 +1,4 @@
-# 生产编排：仅 web / db / caddy 三个服务；数据库不对公网暴露。
+# 生产编排：仅 web / db / nginx 三个服务；数据库不对公网暴露。
 # 使用：cp .env.example .env 填好实际值后执行（步骤见 docs/operations.md）。
 services:
   db:
@@ -35,10 +35,10 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    # 不发布端口：仅 caddy 可达
+    # 不发布端口：仅 nginx 可达
 
-  caddy:
-    image: caddy:2.10.0-alpine
+  nginx:
+    image: nginx:1.30.3
     restart: unless-stopped
     ports:
       - "80:80"
@@ -46,14 +46,13 @@ services:
     environment:
       GITODS_DOMAIN: ${GITODS_DOMAIN:?需要在 .env 提供 GITODS_DOMAIN}
     volumes:
-      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
+      # HTTP 模板；生产 HTTPS 改挂 nginx-tls.conf.template（含证书卷，见 operations.md）
+      - ./deploy/nginx.conf.template:/etc/nginx/templates/gitods.conf.template:ro
+      - nginx_certs:/etc/nginx/certs
     depends_on:
       - web
 
 volumes:
   pgdata:
   appdata:
-  caddy_data:
-  caddy_config:
+  nginx_certs:
