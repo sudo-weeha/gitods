@@ -1,0 +1,59 @@
+# 生产编排：仅 web / db / caddy 三个服务；数据库不对公网暴露。
+# 使用：cp .env.example .env 填好实际值后执行（步骤见 docs/operations.md）。
+services:
+  db:
+    image: postgres:17.11-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?需要在 .env 提供 POSTGRES_PASSWORD}
+      GITODS_APP_PASSWORD: ${GITODS_APP_PASSWORD:?需要在 .env 提供 GITODS_APP_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./deploy/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres}"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    # 不发布端口：仅 compose 内部网络可达
+
+  web:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DEBUG: "False"
+      DATABASE_URL: postgres://gitods_app:${GITODS_APP_PASSWORD}@db:5432/gitods
+      DATA_ROOT: /data/gitods
+      ALLOWED_HOSTS: ${GITODS_DOMAIN}
+      CSRF_TRUSTED_ORIGINS: https://${GITODS_DOMAIN}
+      SITE_ORIGIN: https://${GITODS_DOMAIN}
+    volumes:
+      - appdata:/data/gitods
+    depends_on:
+      db:
+        condition: service_healthy
+    # 不发布端口：仅 caddy 可达
+
+  caddy:
+    image: caddy:2.10.0-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      GITODS_DOMAIN: ${GITODS_DOMAIN:?需要在 .env 提供 GITODS_DOMAIN}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+
+volumes:
+  pgdata:
+  appdata:
+  caddy_data:
+  caddy_config:

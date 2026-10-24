@@ -115,6 +115,11 @@ X_FRAME_OPTIONS = "DENY"
 if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    # 代理头只信任本机 Caddy：应用端口不对公网暴露
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS", default=0)
+    if SECURE_HSTS_SECONDS:
+        SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 
 # 私有数据目录：不可变对象 / 临时文件 / 主机内文件锁，绝不作为静态目录公开
 _data_root = Path(env("DATA_ROOT"))
